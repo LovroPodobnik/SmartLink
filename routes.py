@@ -13,7 +13,22 @@ from railway_api import get_railway_manager
 
 @app.route('/')
 def index():
-    """Landing page"""
+    """Landing page - handles both main domain and custom domains"""
+    current_domain = get_domain_from_request()
+    
+    # Check if this is a custom domain
+    if is_custom_domain(current_domain):
+        # This is a customer's custom domain
+        custom_domain = CustomDomain.query.filter_by(domain=current_domain, is_verified=True, is_active=True).first()
+        
+        if custom_domain:
+            # Show custom domain landing page
+            return render_template('custom_domain_index.html', domain=custom_domain)
+        else:
+            # Custom domain not found or not verified
+            abort(404, description=f"Domain {current_domain} not found or not properly configured.")
+    
+    # This is your main SmartTicker domain - show normal homepage
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
