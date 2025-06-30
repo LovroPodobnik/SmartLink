@@ -25,6 +25,7 @@ SmartLink is a Flask-based web application designed for content creators who nee
 - **LoginTokens**: Time-limited magic link tokens for authentication
 - **SmartLinks**: Core link entities with cloaking configuration
 - **Clicks**: Analytics tracking for each link interaction
+- **CustomDomains**: User-owned domains for branded smart links with verification system
 
 ## Key Components
 
