@@ -126,11 +126,12 @@ class CustomDomain(db.Model):
     
     def get_cname_record_value(self):
         """Get the CNAME record value for routing"""
-        # Use Railway's provided environment variables in order of preference
-        return (os.environ.get('RAILWAY_PUBLIC_DOMAIN') or 
-                os.environ.get('RAILWAY_STATIC_URL') or
+        # For Vercel deployments, use cname.vercel-dns.com
+        # or your specific Vercel app domain
+        return (os.environ.get('VERCEL_URL') or 
+                os.environ.get('VERCEL_APP_DOMAIN') or
                 os.environ.get('APP_DOMAIN') or
-                'web-production-b9e4.up.railway.app')
+                'cname.vercel-dns.com')
     
     def get_verification_file_content(self):
         """Get the verification file content for file-based verification"""

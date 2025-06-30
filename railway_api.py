@@ -44,6 +44,9 @@ class RailwayDomainManager:
         
         except requests.exceptions.RequestException as e:
             logger.error(f"Railway API request failed: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error(f"Response status: {e.response.status_code}")
+                logger.error(f"Response body: {e.response.text}")
             raise Exception(f"Railway API error: {str(e)}")
     
     def add_custom_domain(self, domain: str) -> Dict[str, Any]:
@@ -62,25 +65,21 @@ class RailwayDomainManager:
                 id
                 domain
                 status
-                cnameCheck {
-                    status
-                    message
-                    link
-                }
             }
         }
         """
         
         variables = {
             "input": {
-                "projectId": self.project_id,
-                "serviceId": self.service_id,
+                "domain": domain,
                 "environmentId": self.environment_id,
-                "domain": domain
+                "projectId": self.project_id,
+                "serviceId": self.service_id
             }
         }
         
         logger.info(f"Adding custom domain {domain} to Railway")
+        logger.debug(f"Variables: {variables}")
         result = self._make_request(mutation, variables)
         
         if result.get('errors'):
@@ -114,6 +113,17 @@ class RailwayDomainManager:
             if 'permission' in error_msg.lower() or 'forbidden' in error_msg.lower():
                 logger.error(f"Permission denied when adding domain {domain}")
                 raise Exception(f"Railway API permission denied. Please check your API token permissions.")
+            
+            # Handle generic "Problem processing request" errors
+            if 'problem processing request' in error_msg.lower():
+                logger.warning(f"Railway API generic error for domain {domain}")
+                # For now, provide manual setup instructions due to API issues
+                return {
+                    'id': f'pending-{domain}',
+                    'domain': domain,
+                    'status': 'pending_manual',
+                    'message': 'Domain verified! Complete setup in Railway dashboard: Project Settings → Custom Domains → Add Domain'
+                }
             
             raise Exception(f"Railway domain creation failed: {error_msg}")
         

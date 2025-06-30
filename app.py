@@ -39,9 +39,13 @@ if env == 'production':
 # Configure the database
 database_url = os.environ.get("DATABASE_URL", "sqlite:///smartlink.db")
 
-# Fix Railway/Heroku postgres URL format for SQLAlchemy 2.0+
+# Fix Railway/Heroku/Supabase postgres URL format for SQLAlchemy 2.0+
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# For Vercel, ensure we're not using local SQLite in production
+if os.environ.get('VERCEL_ENV') and database_url.startswith("sqlite"):
+    raise ValueError("SQLite cannot be used on Vercel. Please configure DATABASE_URL with PostgreSQL.")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 

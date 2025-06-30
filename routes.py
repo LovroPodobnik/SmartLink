@@ -11,7 +11,7 @@ from utils import (
     is_tiktok_bot, detect_platform_from_request, analyze_request_fingerprint
 )
 from detection_engine import enhanced_bot_detection, is_sophisticated_tiktok_bot
-from railway_api import get_railway_manager
+from vercel_api import get_vercel_manager
 
 @app.route('/')
 def index():
@@ -470,35 +470,39 @@ def check_domain_verification(domain_id):
         domain.is_verified = True
         domain.verified_at = datetime.utcnow()
         
-        # 🚀 AUTO-ADD TO RAILWAY
+        # 🚀 AUTO-ADD TO VERCEL
         try:
-            railway_manager = get_railway_manager()
-            railway_result = railway_manager.add_custom_domain(domain.domain)
+            vercel_manager = get_vercel_manager()
+            vercel_result = vercel_manager.add_custom_domain(domain.domain)
             
-            if railway_result:
-                status = railway_result.get('status', 'unknown')
-                railway_id = railway_result.get('id')
+            if vercel_result:
+                status = vercel_result.get('status', 'unknown')
+                domain_id = vercel_result.get('id')
                 
                 if status == 'existing':
-                    # Domain already exists in Railway
+                    # Domain already exists in Vercel
                     domain.ssl_enabled = True
-                    app.logger.info(f"Domain {domain.domain} already exists in Railway")
-                    flash(f'Domain {domain.domain} successfully verified! The domain is already configured in Railway.', 'success')
-                elif status == 'manual_required':
-                    # Domain needs manual configuration
-                    app.logger.warning(f"Domain {domain.domain} requires manual configuration")
-                    flash(f'Domain {domain.domain} verified! Note: The domain may need manual configuration. Please ensure your CNAME record points to {domain.get_cname_record_value()}', 'warning')
+                    app.logger.info(f"Domain {domain.domain} already exists in Vercel")
+                    flash(f'Domain {domain.domain} successfully verified! The domain is already configured.', 'success')
+                elif status == 'verified':
+                    # Domain successfully added and verified
+                    domain.ssl_enabled = True
+                    app.logger.info(f"Domain {domain.domain} added to Vercel with ID {domain_id}")
+                    flash(f'Domain {domain.domain} successfully verified and activated! SSL enabled automatically.', 'success')
+                elif status == 'pending_verification':
+                    # Domain added but needs Vercel verification
+                    app.logger.info(f"Domain {domain.domain} added to Vercel, pending platform verification")
+                    flash(f'Domain {domain.domain} added! Vercel is verifying the domain configuration. This may take a few minutes.', 'info')
                 else:
-                    # Domain successfully added
-                    domain.ssl_enabled = True  # Railway auto-provisions SSL
-                    app.logger.info(f"Domain {domain.domain} added to Railway with ID {railway_id}")
-                    flash(f'Domain {domain.domain} successfully verified and activated! SSL will be enabled automatically.', 'success')
+                    # Unknown status
+                    app.logger.warning(f"Unknown status for domain {domain.domain}: {status}")
+                    flash(f'Domain {domain.domain} processed with status: {status}', 'warning')
             else:
-                app.logger.warning(f"Domain {domain.domain} verified but Railway setup failed")
+                app.logger.warning(f"Domain {domain.domain} verified but Vercel setup failed")
                 flash(f'Domain {domain.domain} verified but automatic setup failed. Please contact support.', 'warning')
                 
         except Exception as e:
-            app.logger.error(f"Railway API error for domain {domain.domain}: {str(e)}")
+            app.logger.error(f"Vercel API error for domain {domain.domain}: {str(e)}")
             flash(f'Domain {domain.domain} verified but automatic setup failed: {str(e)}', 'warning')
         
         db.session.commit()
