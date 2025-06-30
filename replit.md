@@ -110,12 +110,37 @@ SmartLink is a Flask-based web application designed for content creators who nee
 - **Session Security**: Secure session keys and HTTPS-ready
 - **Rate Limiting**: Ready for implementation with Flask-Limiter
 
+## Deployment
+
+### Production Ready
+SmartLink is ready for production deployment with the following files:
+- `DEPLOYMENT.md` - Complete deployment guide for Railway (~$10/month)
+- `Procfile` - Process configuration for deployment platforms
+- `runtime.txt` - Python version specification
+- `railway.json` - Railway-specific configuration
+- `setup_production.py` - Production setup script
+
+### Recommended Platform: Railway
+- Cost: ~$10/month (app + database)
+- Features: Automatic PostgreSQL, custom domains, SSL certificates
+- Setup: Git-based deployment with environment variables
+
+### Environment Variables Required
+```
+FLASK_SECRET_KEY=generated-secret-key
+DATABASE_URL=postgresql://connection-string
+MAIL_SERVER=smtp.gmail.com
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=gmail-app-password
+```
+
 ## Changelog
 
 ```
 Changelog:
 - June 30, 2025. Initial setup
 - June 30, 2025. Added custom domain functionality with verification system
+- June 30, 2025. Created complete deployment guide and production configuration
 ```
 
 ## User Preferences
