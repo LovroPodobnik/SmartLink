@@ -3,7 +3,7 @@ from flask import jsonify
 from app import app, db
 
 @app.route('/health')
-def health_check():
+def health():
     """Health check endpoint for Railway"""
     try:
         # Simple database connectivity check
