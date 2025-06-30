@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SmartLink{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Dashboard</h1>
+                    <p class="text-muted">Welcome back, {{ user.email }}</p>
+                </div>
+                <a href="{{ url_for('create_link') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Smart Link
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Links</h6>
+                            <h2 class="mb-0">{{ smart_links|length }}</h2>
+                        </div>
+                        <i class="fas fa-link fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Human Clicks</h6>
+                            <h2 class="mb-0">{{ smart_links|sum(attribute='1.human_clicks') or 0 }}</h2>
+                        </div>
+                        <i class="fas fa-user fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Bot Clicks</h6>
+                            <h2 class="mb-0">{{ smart_links|sum(attribute='1.bot_clicks') or 0 }}</h2>
+                        </div>
+                        <i class="fas fa-robot fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Clicks</h6>
+                            <h2 class="mb-0">{{ smart_links|sum(attribute='1.total_clicks') or 0 }}</h2>
+                        </div>
+                        <i class="fas fa-mouse-pointer fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Smart Links Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Smart Links</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if smart_links %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Short URL</th>
+                                        <th>Target</th>
+                                        <th>Clicks</th>
+                                        <th>Human/Bot</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for link_data in smart_links %}
+                                        {% set link = link_data[0] %}
+                                        {% set stats = link_data[1:] %}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ link.title }}</strong>
+                                                    {% if link.description %}
+                                                        <br><small class="text-muted">{{ link.description[:50] }}{% if link.description|length > 50 %}...{% endif %}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <code class="user-select-all">{{ request.url_root }}{{ link.short_code }}</code>
+                                                <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ request.url_root }}{{ link.short_code }}')">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <a href="{{ link.target_url }}" target="_blank" class="text-decoration-none">
+                                                    {{ link.target_url[:30] }}{% if link.target_url|length > 30 %}...{% endif %}
+                                                    <i class="fas fa-external-link-alt ms-1"></i>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ stats[0] or 0 }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <span class="badge bg-success">{{ stats[1] or 0 }} H</span>
+                                                    <span class="badge bg-warning">{{ stats[2] or 0 }} B</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">{{ link.created_at.strftime('%Y-%m-%d') }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url_for('analytics', short_code=link.short_code) }}" class="btn btn-outline-primary">
+                                                        <i class="fas fa-chart-line"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-link text-muted fa-3x mb-3"></i>
+                            <h5>No Smart Links Yet</h5>
+                            <p class="text-muted">Create your first smart link to get started</p>
+                            <a href="{{ url_for('create_link') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create Smart Link
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success feedback
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = 'Link copied to clipboard!';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    });
+}
+</script>
+{% endblock %}

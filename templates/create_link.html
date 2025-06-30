@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Create Smart Link - SmartLink{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus me-2"></i>Create Smart Link
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.title.label(class="form-label") }}
+                                {{ form.title(class="form-control", placeholder="e.g., My OnlyFans Link") }}
+                                {% for error in form.title.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.description.label(class="form-label") }}
+                                {{ form.description(class="form-control", placeholder="Optional description", rows="3") }}
+                                {% for error in form.description.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.target_url.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                {{ form.target_url(class="form-control", placeholder="https://onlyfans.com/your-profile") }}
+                            </div>
+                            {% for error in form.target_url.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                            <small class="form-text text-muted">This is where real users will be redirected</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.safe_url.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                                {{ form.safe_url(class="form-control", placeholder="https://your-website.com (optional)") }}
+                            </div>
+                            {% for error in form.safe_url.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                            <small class="form-text text-muted">Custom safe page for bots. Leave empty to use our default safe page.</small>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            {{ form.use_js_challenge(class="form-check-input") }}
+                                            {{ form.use_js_challenge.label(class="form-check-label") }}
+                                        </div>
+                                        <small class="text-muted">
+                                            Suspicious requests will face a JavaScript challenge before redirect
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            {{ form.direct_from_tiktok(class="form-check-input") }}
+                                            {{ form.direct_from_tiktok.label(class="form-check-label") }}
+                                        </div>
+                                        <small class="text-muted">
+                                            TikTok users go directly to target even with unknown user agents
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic me-2"></i>Create Smart Link
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- How it works -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>How Smart Links Work
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-robot text-danger fa-2x mb-2"></i>
+                            <h6>Bots & Crawlers</h6>
+                            <small class="text-muted">
+                                Platform crawlers see a safe, generic landing page with no adult content
+                            </small>
+                        </div>
+                        
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-user text-success fa-2x mb-2"></i>
+                            <h6>Real Users</h6>
+                            <small class="text-muted">
+                                Human visitors are redirected instantly to your OnlyFans or target URL
+                            </small>
+                        </div>
+                        
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-question-circle text-warning fa-2x mb-2"></i>
+                            <h6>Suspicious Traffic</h6>
+                            <small class="text-muted">
+                                Suspicious requests can be challenged or sent to safe page
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
