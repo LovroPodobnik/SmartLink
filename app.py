@@ -38,7 +38,20 @@ if env == 'production':
 
 # Configure the database
 database_url = os.environ.get("DATABASE_URL", "sqlite:///smartlink.db")
+
+# Fix Railway/Heroku postgres URL format for SQLAlchemy 2.0+
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+
+# Debug logging for database configuration
+if env == 'development':
+    app.logger.info(f"Database URL: {database_url}")
+else:
+    # Don't log full URL in production for security, just the type
+    db_type = database_url.split("://")[0] if "://" in database_url else "unknown"
+    app.logger.info(f"Database type: {db_type}")
 
 # Database engine options - different for SQLite vs PostgreSQL
 if database_url.startswith("sqlite"):
@@ -67,9 +80,19 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'norep
 db.init_app(app)
 mail.init_app(app)
 
+# Import models and routes
+import models
+import routes
+
+# Initialize database tables
 with app.app_context():
-    # Import models and routes
-    import models
-    import routes
-    
-    db.create_all()
+    try:
+        db.create_all()
+        app.logger.info("Database tables created successfully")
+    except Exception as e:
+        app.logger.error(f"Database initialization failed: {e}")
+        if env == 'development':
+            raise
+        else:
+            # In production, continue without crashing but log the error
+            app.logger.error("Continuing without database initialization")

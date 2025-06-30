@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session, jsonify, abort
 from datetime import datetime, timedelta
+from sqlalchemy import text
 from app import app, db
 from models import User, SmartLink, Click, LoginToken, CustomDomain
 from forms import LoginForm, SmartLinkForm, CustomDomainForm
@@ -422,6 +423,24 @@ def test_domain():
     <hr>
     <small>Now create a SmartLink using this domain and test the short URLs.</small>
     """
+
+@app.route('/health')
+def health_check():
+    """Health check endpoint for deployment monitoring"""
+    import os
+    try:
+        # Test database connection
+        db.session.execute(text('SELECT 1'))
+        db_status = "✅ Connected"
+    except Exception as e:
+        db_status = f"❌ Error: {str(e)[:100]}"
+    
+    return {
+        "status": "ok",
+        "database": db_status,
+        "environment": os.environ.get('FLASK_ENV', 'unknown'),
+        "version": "1.0.0"
+    }
 
 @app.errorhandler(404)
 def not_found(error):
