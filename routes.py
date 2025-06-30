@@ -9,6 +9,7 @@ from utils import (
     is_suspicious_request, send_magic_link_email, truncate_ip,
     verify_domain_ownership, get_domain_from_request, is_custom_domain
 )
+from railway_api import get_railway_manager
 
 @app.route('/')
 def index():
@@ -374,7 +375,7 @@ def verify_domain(domain_id):
 @app.route('/domains/<int:domain_id>/check', methods=['POST'])
 @login_required
 def check_domain_verification(domain_id):
-    """Check if domain verification is complete"""
+    """Check if domain verification is complete and auto-add to Railway"""
     user_id = session['user_id']
     domain = CustomDomain.query.filter_by(id=domain_id, user_id=user_id).first()
     
@@ -386,9 +387,28 @@ def check_domain_verification(domain_id):
     if verify_domain_ownership(domain.domain, domain.verification_token, verification_method):
         domain.is_verified = True
         domain.verified_at = datetime.utcnow()
-        db.session.commit()
         
-        flash(f'Domain {domain.domain} successfully verified!', 'success')
+        # 🚀 AUTO-ADD TO RAILWAY
+        try:
+            railway_manager = get_railway_manager()
+            railway_result = railway_manager.add_custom_domain(domain.domain)
+            
+            if railway_result:
+                # Railway domain successfully added
+                domain.ssl_enabled = True  # Railway auto-provisions SSL
+                domain.railway_domain_id = railway_result.get('id')  # Store Railway ID
+                
+                app.logger.info(f"Domain {domain.domain} added to Railway with ID {domain.railway_domain_id}")
+                flash(f'Domain {domain.domain} successfully verified and activated! SSL enabled automatically.', 'success')
+            else:
+                app.logger.warning(f"Domain {domain.domain} verified but Railway setup failed")
+                flash(f'Domain {domain.domain} verified but automatic setup failed. Please contact support.', 'warning')
+                
+        except Exception as e:
+            app.logger.error(f"Railway API error for domain {domain.domain}: {str(e)}")
+            flash(f'Domain {domain.domain} verified but automatic setup failed: {str(e)}', 'warning')
+        
+        db.session.commit()
         return redirect(url_for('manage_domains'))
     else:
         method_name = 'DNS TXT record' if verification_method == 'dns' else 'verification file'
@@ -398,12 +418,26 @@ def check_domain_verification(domain_id):
 @app.route('/domains/<int:domain_id>/delete', methods=['POST'])
 @login_required
 def delete_domain(domain_id):
-    """Delete a custom domain"""
+    """Delete a custom domain and remove from Railway"""
     user_id = session['user_id']
     domain = CustomDomain.query.filter_by(id=domain_id, user_id=user_id).first()
     
     if not domain:
         abort(404)
+    
+    # Remove from Railway if it was added there
+    if domain.railway_domain_id:
+        try:
+            railway_manager = get_railway_manager()
+            success = railway_manager.delete_custom_domain(domain.railway_domain_id)
+            
+            if success:
+                app.logger.info(f"Domain {domain.domain} removed from Railway")
+            else:
+                app.logger.warning(f"Failed to remove domain {domain.domain} from Railway")
+                
+        except Exception as e:
+            app.logger.error(f"Railway API error while deleting domain {domain.domain}: {str(e)}")
     
     db.session.delete(domain)
     db.session.commit()
