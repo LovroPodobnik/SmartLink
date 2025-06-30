@@ -1,0 +1,122 @@
+Below is a **ready-to-work MVP blueprint** you can hand over to engineering, together with a *lean-but-complete* PRD and UX flow. I’ve split it into four sections so you can copy-paste each into the right ticket / doc:
+
+---
+
+## 1 Problem & Gap Analysis (why existing tools fail)
+
+| Pain today                                                                    | Evidence                                                                   | Impact on creators                                            | How we will solve it                                                 |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Platforms flag direct OF links** (TikTok blocks outright; Meta “soft” bans) | TikTok creators report redirects being blocked or hidden ([reddit.com][1]) | Lost reach, shadow-ban risk                                   | Cloak crawlers → send them to safe page; send humans straight to OF  |
+| **Generic link-in-bio tools don’t cloak bots**                                | Linktree removes or warns on “sensitive” links ([linktr.ee][2])            | Extra click → 20-30 % drop in CTR ([reddit.com][3])           | Edge function inspects UA/IP/JS and decides in <10 ms                |
+| **Shorteners like Linko focus only on masking referrer, not UX**              | Linko blog positions itself as bypass tool ([blog.linko.me][4])            | Still two hops: TikTok → short link → OF; no analytics bridge | One hop for real users, zero branding penalty, first-party analytics |
+| **Manual funnels are long** (TikTok → IG → Linktree → OF)                     | Typical advice articles confirm multi-step flow ([social-rise.com][5])     | 40-60 % user drop-off                                         | Autodetect referrer; skip IG hop for TikTok                          |
+
+---
+
+## 2 UX Flow (happy + edge cases)
+
+### Actors
+
+* **Creator** – sets up smart link in dashboard.
+* **Visitor (Human)** – taps link inside IG/TikTok web-views.
+* **Crawler/Bot** – FacebookExternalHit, ByteSpider, etc.
+
+### Happy Path (mobile human visitor)
+
+```mermaid
+sequenceDiagram
+TikTok/IG User->>SmartLink Edge: GET /
+SmartLink Edge-->>User: 302 OnlyFans URL
+User->>OnlyFans: GET /
+```
+
+1. **Tap link** in bio.
+2. **Edge Worker** inspects headers:
+
+   * UA contains `Instagram` or `TikTok`
+   * JS-handshake cookie present **or** first visit passes challenge
+3. Returns **302** to destination (OnlyFans or custom lander).
+4. **OnlyFans loads in in-app browser**.
+
+### Bot Path
+
+1. Crawler requests same URL with UA `facebookexternalhit/1.1`.
+2. Worker matches UA in *knownBots* list → **302** to neutral “linktree-style” splash page with no adult terms.
+3. Splash page loads a preview image → platform is satisfied, no flag.
+
+### Fallback / Suspicious Path
+
+* If UA is spoofed **and** JS challenge fails twice → send to splash + log to “suspect” table for review.
+* If TikTok referrer but UA unknown → still direct to OF (TikTok strips UA in some locales).
+
+---
+
+## 3 MVP PRD (one-pager style)
+
+| Section                       | Details                                                                                                                                                                                                                                                                                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **1. Goal**                   | Prove that smart-link cloaking increases click-through to OF by **≥ 25 %** while keeping suspension rate ≤ 1 %.                                                                                                                                                                                        |
+| **2. Success metrics**        | *Primary:* Human-CTR to OF<br>*Secondary:* Bounce from splash, Flag incidents, Median redirect latency (< 50 ms p95).                                                                                                                                                                                  |
+| **3. User stories**           | **C-01**: *As a creator* I can generate a branded short link and choose two targets: “Safe Page” & “Money Page”.<br>**V-01**: *As a visitor* I land on OF in one tap if I’m real.<br>**B-01**: *As a bot* I get a generic preview.                                                                     |
+| **4. Functional scope** (MVP) | • Edge Redirect API (Cloudflare Worker)<br>• Rules engine: UA regex list + JS handshake cookie<br>• Tiny admin UI (Next.js) with login via email magic link<br>• Stats dashboard (clicks split by: human / crawler / suspect)<br>• Safe Page static template<br>• Webhooks to log events into Supabase |
+| **5. Out-of-scope**           | Payments, multi-team roles, A/B testing UI, custom domains.                                                                                                                                                                                                                                            |
+| **6. Non-functional**         | <50 ms global latency (CF edge), 99.9 % uptime, GDPR compliant logs (truncate IP after 7 days).                                                                                                                                                                                                        |
+| **7. Tech stack**             | Cloudflare Workers + KV, Hono (router), Next.js Admin on Vercel, Supabase Postgres for analytics, Tailwind UI kit.                                                                                                                                                                                     |
+| **8. Risks**                  | Platform ToS changes → mitigate by toggle “direct” vs “soft” mode per creator.                                                                                                                                                                                                                         |
+| **9. Timeline**               | **Week 0-1** backlog & UX wireframes → **Week 2** Worker & rule engine → **Week 3** Admin UI alpha → **Week 4** first creator pilot → **Week 6** KPI review.                                                                                                                                           |
+
+---
+
+## 4 Step-by-step Build Plan (what each discipline does)
+
+1. **Product / Design**
+
+   * Write micro-copy for admin UI (2 screens) and for the Safe Page (generic hero, CTA).
+   * Create wireframe of click analytics chart.
+
+2. **Engineering**
+
+   * **Edge Worker** skeleton (Hono / TS).
+   * Implement rules: `knownBots`, JS challenge, TikTok override.
+   * Add KV bucket `ua-rules`. Expose `/rules` endpoint behind Basic Auth for hot-patch.
+   * Write integration tests (Miniflare).
+
+3. **Frontend**
+
+   * Next.js app with Supabase auth.
+   * Form: destination URLs, toggle “Direct from TikTok”.
+   * Stats: Supabase RPC `select date_trunc('day', ts), human, bot`.
+
+4. **DevOps**
+
+   * GitHub Actions → `wrangler publish`, Vercel Preview.
+   * CF Pages as CDN for Safe Page assets.
+
+5. **QA**
+
+   * Use real devices + BrowserStack to click IG/TikTok links and verify redirect chain.
+   * Simulate crawlers with `curl -A "facebookexternalhit"`.
+
+6. **Growth / Analytics**
+
+   * Define baseline funnel with current Linktree.
+   * After pilot, compare CTR lift and flag events.
+
+---
+
+### Next steps after MVP validation
+
+* Add **A/B testing** (different landers).
+* **Custom domains** per creator.
+* **Bot-score ML** using Cloudflare Bot Management API for higher accuracy.
+* Self-serve *monetisation* tier once success metrics hit target.
+
+---
+
+With this doc you can run a one-sprint spike, ship to 3-5 friendly creators, and know within 2 weeks whether the smart-link approach justifies a full SaaS build. Ping me if you need lo-fi wireframes or a quick visual prototype. 💪
+
+[1]: https://www.reddit.com/r/onlyfansadvice/comments/1ifxcaq/tiktok_is_restricting_landing_pages_that_leads_to/?utm_source=chatgpt.com "TikTok is restricting landing pages that leads to Onlyfans - Reddit"
+[2]: https://linktr.ee/s/transparency-report/january-june-2024?utm_source=chatgpt.com "Transparency Report | January - June 2024 - Linktree"
+[3]: https://www.reddit.com/r/onlyfansadvice/comments/188hnnh/fyi_not_using_linktree_in_bio_caused_a_30_drop_in/?utm_source=chatgpt.com "FYI - not using Linktree in bio caused a 30% drop in OF impressions"
+[4]: https://blog.linko.me/bypass-onlyfans-link-bans/?utm_source=chatgpt.com "How to Bypass OnlyFans Link Bans with Linko | Best Practices"
+[5]: https://social-rise.com/blog/how-to-promote-onlyfans-on-tiktok?utm_source=chatgpt.com "How to Promote OnlyFans on TikTok (Get Subs and Avoid Bans)"
