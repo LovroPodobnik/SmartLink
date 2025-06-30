@@ -83,14 +83,22 @@ class AdvancedDetectionEngine:
             }
         }
         
-        # Instagram/Facebook bot signatures
+        # Instagram/Facebook bot signatures - INCLUDING IN-APP BROWSERS
         self.instagram_bot_signatures = {
             'user_agents': [
                 r'facebookexternalhit',
                 r'facebookcatalog',
                 r'instagrambot',
                 r'meta.*external.*hit',
-                r'whatsapp.*preview'
+                r'whatsapp.*preview',
+                # Instagram in-app browser patterns
+                r'instagram\s+[\d\.]+',  # e.g., Instagram 303.0.0.11.109
+                # Facebook in-app browser patterns
+                r'\[FBAN/',               # Facebook App Network
+                r'FBAV/',                  # Facebook App Version
+                r'FBIOS',                  # Facebook iOS
+                r'FBDV/',                  # Facebook Device
+                r'\[FB',                  # Generic Facebook in-app pattern
             ],
             'referrer_patterns': [
                 r'facebook\.com',

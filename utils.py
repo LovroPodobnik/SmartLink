@@ -21,7 +21,13 @@ BOT_PATTERNS = [
     r'facebookexternalhit',     # Facebook link preview
     r'facebookcatalog',         # Facebook catalog
     r'instagrambot',            # Instagram crawler
+    r'instagram\s+\d+',        # Instagram in-app browser (e.g., Instagram 303.0.0.11.109)
     r'meta.*bot',               # Meta variants
+    r'FBAN',                    # Facebook App identifier
+    r'FBAV',                    # Facebook App version
+    r'FBIOS',                   # Facebook iOS app
+    r'FBDV',                    # Facebook device
+    r'\[FB',                    # Facebook in-app browser pattern
     
     # Twitter/X
     r'twitterbot',
@@ -55,8 +61,9 @@ BOT_PATTERNS = [
     r'puppeteer'
 ]
 
-# TikTok-specific user agent patterns for enhanced detection
-TIKTOK_SPECIFIC_PATTERNS = [
+# Platform-specific in-app browser patterns
+IN_APP_BROWSER_PATTERNS = [
+    # TikTok patterns
     r'bytespider',
     r'tiktok',
     r'musically',
@@ -65,7 +72,20 @@ TIKTOK_SPECIFIC_PATTERNS = [
     r'aweme',                   # TikTok internal name
     r'com\.zhiliaoapp\.musically',  # TikTok mobile app identifier
     r'musical_ly',
+    r'bytedancewebview',        # TikTok in-app browser WebView
+    
+    # Instagram patterns
+    r'instagram\s+[\d\.]+',   # Instagram app with version (e.g., Instagram 303.0.0.11.109)
+    
+    # Facebook patterns  
+    r'\[FBAN/',                # Facebook App Network identifier
+    r'FBAV/',                   # Facebook App Version
+    r'FBIOS',                   # Facebook iOS
+    r'FBDV/',                   # Facebook Device
 ]
+
+# Legacy variable for backward compatibility
+TIKTOK_SPECIFIC_PATTERNS = IN_APP_BROWSER_PATTERNS[:9]  # First 9 are TikTok patterns
 
 # Platform IP ranges (simplified - in production, use complete CIDR blocks)
 PLATFORM_IP_RANGES = {
@@ -111,6 +131,33 @@ def is_tiktok_bot(user_agent, ip_address=None):
     # Check IP ranges if available
     if ip_address and is_platform_ip(ip_address, 'tiktok'):
         return True
+    
+    return False
+
+def is_social_media_bot(user_agent, platform=None):
+    """Detect social media platform in-app browsers and crawlers"""
+    if not user_agent:
+        return True
+        
+    # First check general bot patterns which includes in-app browsers
+    if is_bot_user_agent(user_agent):
+        return True
+    
+    user_agent_lower = user_agent.lower()
+    
+    # Check for any in-app browser patterns
+    for pattern in IN_APP_BROWSER_PATTERNS:
+        if re.search(pattern, user_agent_lower):
+            return True
+    
+    # Additional platform-specific checks
+    if platform:
+        if platform == 'instagram' and 'instagram' in user_agent_lower:
+            return True
+        elif platform == 'facebook' and any(fb in user_agent for fb in ['FBAN', 'FBAV', 'FBIOS', '[FB']):
+            return True
+        elif platform == 'tiktok' and any(tt in user_agent_lower for tt in ['tiktok', 'bytedance', 'musical']):
+            return True
     
     return False
 
