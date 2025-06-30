@@ -49,6 +49,7 @@ SmartLink is a Flask-based web application designed for content creators who nee
 ### Link Management
 - **Short Code Generation**: Unique alphanumeric identifiers
 - **Dual URL System**: Target URL (OnlyFans) + Optional safe page URL
+- **Custom Domain Support**: Links can use verified custom domains for branding
 - **Configuration Options**: JS challenge toggle, TikTok direct routing
 - **Link Lifecycle**: Active/inactive status management
 

@@ -59,6 +59,24 @@
                             <small class="form-text text-muted">Custom safe page for bots. Leave empty to use our default safe page.</small>
                         </div>
                         
+                        <div class="mb-4">
+                            {{ form.custom_domain_id.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                {{ form.custom_domain_id(class="form-control") }}
+                            </div>
+                            {% for error in form.custom_domain_id.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                            <small class="form-text text-muted">
+                                {% if verified_domains %}
+                                    Choose a custom domain for branded links, or use the default SmartLink domain.
+                                {% else %}
+                                    <a href="{{ url_for('add_domain') }}" class="text-decoration-none">Add a custom domain</a> for branded links.
+                                {% endif %}
+                            </small>
+                        </div>
+                        
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <div class="card bg-light">

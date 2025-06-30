@@ -143,9 +143,9 @@ def create_link():
         is_active=True
     ).all()
     
-    # Set up domain choices
+    # Set up domain choices - use string values to avoid coercion issues
     domain_choices = [('', 'Default Domain (SmartLink)')] + [
-        (domain.id, domain.domain) for domain in verified_domains
+        (str(domain.id), domain.domain) for domain in verified_domains
     ]
     form.custom_domain_id.choices = domain_choices
     

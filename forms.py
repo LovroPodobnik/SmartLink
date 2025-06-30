@@ -10,7 +10,7 @@ class SmartLinkForm(FlaskForm):
     description = TextAreaField('Description', validators=[Length(max=500)])
     target_url = URLField('Target URL (OnlyFans/Destination)', validators=[DataRequired(), URL()])
     safe_url = URLField('Safe Page URL (Optional)', validators=[URL(require_tld=False)])
-    custom_domain_id = SelectField('Domain', coerce=int, validators=[])
+    custom_domain_id = SelectField('Domain', coerce=lambda x: int(x) if x else None, validators=[])
     use_js_challenge = BooleanField('Use JavaScript Challenge', default=True)
     direct_from_tiktok = BooleanField('Direct from TikTok', default=True)
 

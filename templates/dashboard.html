@@ -112,8 +112,18 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <code class="user-select-all">{{ request.url_root }}{{ link.short_code }}</code>
-                                                <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ request.url_root }}{{ link.short_code }}')">
+                                                {% if link.custom_domain and link.custom_domain.is_verified and link.custom_domain.is_active %}
+                                                    {% set full_url = (link.custom_domain.ssl_enabled and 'https://' or 'http://') + link.custom_domain.domain + '/' + link.short_code %}
+                                                    <div>
+                                                        <code class="user-select-all">{{ full_url }}</code>
+                                                        <small class="d-block text-success">
+                                                            <i class="fas fa-globe"></i> Custom Domain
+                                                        </small>
+                                                    </div>
+                                                {% else %}
+                                                    <code class="user-select-all">{{ request.url_root }}{{ link.short_code }}</code>
+                                                {% endif %}
+                                                <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ full_url if (link.custom_domain and link.custom_domain.is_verified and link.custom_domain.is_active) else request.url_root + link.short_code }}')">
                                                     <i class="fas fa-copy"></i>
                                                 </button>
                                             </td>
