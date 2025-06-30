@@ -7,8 +7,10 @@ from forms import LoginForm, SmartLinkForm, CustomDomainForm
 from utils import (
     is_bot_user_agent, get_platform_from_referrer, get_platform_from_user_agent,
     is_suspicious_request, send_magic_link_email, truncate_ip,
-    verify_domain_ownership, get_domain_from_request, is_custom_domain
+    verify_domain_ownership, get_domain_from_request, is_custom_domain,
+    is_tiktok_bot, detect_platform_from_request, analyze_request_fingerprint
 )
+from detection_engine import enhanced_bot_detection, is_sophisticated_tiktok_bot
 from railway_api import get_railway_manager
 
 @app.route('/')
@@ -255,31 +257,49 @@ def smart_redirect(short_code):
     referrer = request.headers.get('Referer', '')
     ip_address = request.remote_addr
     
-    # Determine platform and click type
-    platform = get_platform_from_referrer(referrer) or get_platform_from_user_agent(user_agent)
+    # Advanced detection engine analysis
+    detection_result = enhanced_bot_detection(user_agent, ip_address)
     
-    # Decision logic
-    is_bot = is_bot_user_agent(user_agent)
+    # Legacy detection methods for fallback
+    is_bot_legacy = is_bot_user_agent(user_agent)
+    is_tiktok_legacy = is_tiktok_bot(user_agent, ip_address)
     is_suspicious = is_suspicious_request()
     
-    # Determine redirect target and click type
-    if is_bot:
-        # Bot detected - send to safe page
+    # Enhanced detection with confidence scoring
+    is_bot = detection_result.is_bot or is_bot_legacy
+    is_tiktok = is_sophisticated_tiktok_bot(user_agent, ip_address) or is_tiktok_legacy
+    platform = detection_result.platform
+    confidence_score = detection_result.confidence_score
+    risk_level = detection_result.risk_level
+    
+    # Platform-specific routing logic
+    if is_bot or is_tiktok:
+        # Bot detected - send to platform-specific safe page
         click_type = 'bot'
         target_reached = 'safe'
-        redirect_url = smart_link.safe_url or url_for('safe_page', short_code=short_code, _external=True)
+        
+        # Use platform-specific safe page if available
+        if platform == 'tiktok':
+            redirect_url = url_for('safe_page_tiktok', short_code=short_code, _external=True)
+        elif platform in ['instagram', 'facebook']:
+            redirect_url = url_for('safe_page_instagram', short_code=short_code, _external=True)
+        else:
+            # Fallback to custom safe URL or generic safe page
+            redirect_url = smart_link.safe_url or url_for('safe_page', short_code=short_code, _external=True)
+            
     elif is_suspicious and smart_link.use_js_challenge:
         # Suspicious request - JavaScript challenge
         click_type = 'suspect'
         target_reached = 'challenge'
         redirect_url = url_for('js_challenge', short_code=short_code, _external=True)
     else:
-        # Human user - direct to target
+        # Human user - direct to target (OnlyFans/target URL)
         click_type = 'human'
         target_reached = 'target'
         redirect_url = smart_link.target_url
     
-    # Log the click
+    # Log the click with enhanced analytics
+    import json
     click = Click(
         smart_link_id=smart_link.id,
         ip_address=truncate_ip(ip_address),
@@ -287,7 +307,10 @@ def smart_redirect(short_code):
         referrer=referrer[:500] if referrer else None,
         click_type=click_type,
         target_reached=target_reached,
-        platform=platform
+        platform=platform,
+        confidence_score=confidence_score,
+        risk_level=risk_level,
+        detection_methods=json.dumps(detection_result.detection_methods)
     )
     db.session.add(click)
     db.session.commit()
@@ -296,13 +319,33 @@ def smart_redirect(short_code):
 
 @app.route('/safe/<short_code>')
 def safe_page(short_code):
-    """Safe landing page for bots"""
+    """Generic safe landing page for bots"""
     smart_link = SmartLink.query.filter_by(short_code=short_code, is_active=True).first()
     
     if not smart_link:
         abort(404)
     
     return render_template('safe_page.html', smart_link=smart_link)
+
+@app.route('/safe/tiktok/<short_code>')
+def safe_page_tiktok(short_code):
+    """TikTok-optimized safe landing page"""
+    smart_link = SmartLink.query.filter_by(short_code=short_code, is_active=True).first()
+    
+    if not smart_link:
+        abort(404)
+    
+    return render_template('safe_page_tiktok.html', smart_link=smart_link)
+
+@app.route('/safe/instagram/<short_code>')
+def safe_page_instagram(short_code):
+    """Instagram-optimized safe landing page"""
+    smart_link = SmartLink.query.filter_by(short_code=short_code, is_active=True).first()
+    
+    if not smart_link:
+        abort(404)
+    
+    return render_template('safe_page_instagram.html', smart_link=smart_link)
 
 @app.route('/challenge/<short_code>')
 def js_challenge(short_code):
@@ -312,9 +355,33 @@ def js_challenge(short_code):
     if not smart_link:
         abort(404)
     
-    # For now, redirect to safe page
-    # In production, this would show a JS challenge
-    return redirect(url_for('safe_page', short_code=short_code))
+    return render_template('js_challenge.html', smart_link=smart_link)
+
+@app.route('/challenge/<short_code>/verify', methods=['POST'])
+def verify_js_challenge(short_code):
+    """Verify JavaScript challenge completion"""
+    smart_link = SmartLink.query.filter_by(short_code=short_code, is_active=True).first()
+    
+    if not smart_link:
+        abort(404)
+    
+    # Get challenge response
+    challenge_response = request.json.get('challenge_response')
+    expected_response = request.json.get('expected_response')
+    
+    # Verify the challenge
+    if challenge_response == expected_response:
+        # Challenge passed - redirect to target
+        return jsonify({
+            'success': True,
+            'redirect_url': smart_link.target_url
+        })
+    else:
+        # Challenge failed - send to safe page
+        return jsonify({
+            'success': False,
+            'redirect_url': url_for('safe_page', short_code=short_code, _external=True)
+        })
 
 @app.route('/api/stats')
 @login_required

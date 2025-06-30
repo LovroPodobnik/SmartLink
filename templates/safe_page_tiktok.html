@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ smart_link.title }} - Content Creator</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- TikTok-style meta tags for link previews -->
+    <meta property="og:title" content="{{ smart_link.title }} - Content Creator">
+    <meta property="og:description" content="Check out my latest creative content and behind-the-scenes videos!">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ smart_link.title }} - Content Creator">
+    <meta name="twitter:description" content="Creative content, tutorials, and entertainment videos">
+    
+    <style>
+        body {
+            background: linear-gradient(45deg, #ff0050, #ff4081, #e91e63);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+        .tiktok-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .content-card {
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .profile-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #ff0050, #ff4081);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(255, 0, 80, 0.3);
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 64, 129, 0.1);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+        }
+        .btn-tiktok {
+            background: linear-gradient(135deg, #ff0050, #ff4081);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .btn-tiktok:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 0, 80, 0.3);
+            color: white;
+        }
+        .feature-box {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .feature-box:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="tiktok-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="content-card p-5">
+                        <!-- Profile Section -->
+                        <div class="text-center mb-5">
+                            <div class="profile-circle">
+                                <i class="fas fa-video fa-3x text-white"></i>
+                            </div>
+                            <h1 class="display-5 fw-bold text-dark mb-2">{{ smart_link.title }}</h1>
+                            {% if smart_link.description %}
+                                <p class="lead text-muted mb-3">{{ smart_link.description }}</p>
+                            {% else %}
+                                <p class="lead text-muted mb-3">Content Creator & Digital Artist</p>
+                            {% endif %}
+                            <div class="d-flex justify-content-center gap-4 mb-4">
+                                <div class="stat-item">
+                                    <div class="h4 fw-bold text-primary mb-1">127K</div>
+                                    <small class="text-muted">Followers</small>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="h4 fw-bold text-primary mb-1">2.3M</div>
+                                    <small class="text-muted">Likes</small>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="h4 fw-bold text-primary mb-1">89</div>
+                                    <small class="text-muted">Videos</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Content Preview -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="feature-box text-center">
+                                    <i class="fas fa-music text-primary fa-2x mb-3"></i>
+                                    <h5>Dance & Music</h5>
+                                    <p class="small text-muted">Latest dance trends and music videos</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-box text-center">
+                                    <i class="fas fa-lightbulb text-warning fa-2x mb-3"></i>
+                                    <h5>Tutorials</h5>
+                                    <p class="small text-muted">Creative tips and how-to content</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-box text-center">
+                                    <i class="fas fa-laugh text-success fa-2x mb-3"></i>
+                                    <h5>Comedy</h5>
+                                    <p class="small text-muted">Funny skits and entertaining videos</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Video Preview Grid -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">Recent Videos</h5>
+                            <div class="row">
+                                <div class="col-4 mb-3">
+                                    <div class="bg-light rounded-3 position-relative" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-play-circle text-primary fa-3x"></i>
+                                        <span class="position-absolute bottom-0 end-0 bg-dark text-white px-2 py-1 rounded-start small">0:15</span>
+                                    </div>
+                                </div>
+                                <div class="col-4 mb-3">
+                                    <div class="bg-light rounded-3 position-relative" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-play-circle text-primary fa-3x"></i>
+                                        <span class="position-absolute bottom-0 end-0 bg-dark text-white px-2 py-1 rounded-start small">0:30</span>
+                                    </div>
+                                </div>
+                                <div class="col-4 mb-3">
+                                    <div class="bg-light rounded-3 position-relative" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-play-circle text-primary fa-3x"></i>
+                                        <span class="position-absolute bottom-0 end-0 bg-dark text-white px-2 py-1 rounded-start small">0:22</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Call to Action -->
+                        <div class="text-center">
+                            <button class="btn btn-tiktok btn-lg me-3" onclick="showFollowModal()">
+                                <i class="fas fa-plus me-2"></i>Follow for More
+                            </button>
+                            <button class="btn btn-outline-primary btn-lg" onclick="showContentModal()">
+                                <i class="fas fa-heart me-2"></i>View All Content
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Follow Modal -->
+    <div class="modal fade" id="followModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Thanks for your interest!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-heart text-danger fa-3x mb-3"></i>
+                    <p>Follow me on my main platforms for the latest content updates!</p>
+                    <p class="text-muted small">Check my bio for all social media links and exclusive content.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Content Modal -->
+    <div class="modal fade" id="contentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Full Content Library</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-video text-primary fa-4x mb-3"></i>
+                        <h5>Premium Content Available</h5>
+                        <p class="text-muted">Visit my main profile for access to exclusive videos, tutorials, and behind-the-scenes content.</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 text-center mb-3">
+                            <div class="bg-light rounded p-3">
+                                <i class="fas fa-crown text-warning fa-2x mb-2"></i>
+                                <h6>VIP Content</h6>
+                                <small class="text-muted">Exclusive access</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-center mb-3">
+                            <div class="bg-light rounded p-3">
+                                <i class="fas fa-graduation-cap text-info fa-2x mb-2"></i>
+                                <h6>Tutorials</h6>
+                                <small class="text-muted">Learn with me</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function showFollowModal() {
+            new bootstrap.Modal(document.getElementById('followModal')).show();
+        }
+        
+        function showContentModal() {
+            new bootstrap.Modal(document.getElementById('contentModal')).show();
+        }
+        
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const featureBoxes = document.querySelectorAll('.feature-box');
+            featureBoxes.forEach((box, index) => {
+                setTimeout(() => {
+                    box.style.opacity = '0';
+                    box.style.transform = 'translateY(20px)';
+                    box.style.transition = 'all 0.5s ease';
+                    setTimeout(() => {
+                        box.style.opacity = '1';
+                        box.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

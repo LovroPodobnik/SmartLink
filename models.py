@@ -85,9 +85,14 @@ class Click(db.Model):
     target_reached = db.Column(db.String(20))  # 'target', 'safe', 'challenge'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Additional tracking
+    # Enhanced platform tracking
+    platform = db.Column(db.String(20))  # 'tiktok', 'instagram', 'facebook', 'twitter', 'other'
     country = db.Column(db.String(2))
-    platform = db.Column(db.String(20))  # 'tiktok', 'instagram', 'other'
+    
+    # Advanced detection analytics
+    confidence_score = db.Column(db.Float)  # Bot detection confidence (0.0-1.0)
+    risk_level = db.Column(db.String(10))   # 'low', 'medium', 'high', 'critical'
+    detection_methods = db.Column(db.Text)  # JSON array of detection methods used
 
 class CustomDomain(db.Model):
     id = db.Column(db.Integer, primary_key=True)

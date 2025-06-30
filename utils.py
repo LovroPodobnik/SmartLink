@@ -2,28 +2,88 @@ import re
 import urllib.request
 import urllib.error
 import dns.resolver
+import ipaddress
 from flask import request
 from flask_mail import Message
 from app import mail
 
-# Known bot user agents
+# Enhanced bot detection patterns with platform-specific detection
 BOT_PATTERNS = [
-    r'facebookexternalhit',
-    r'bytespider',
+    # TikTok crawlers (comprehensive coverage)
+    r'bytespider',              # Main TikTok crawler
+    r'tiktok',                  # Generic TikTok pattern
+    r'musicallybot',            # Legacy Musical.ly bot
+    r'bytedance',               # Parent company crawlers
+    r'tiktok.*bot',             # TikTok variants
+    r'douyin',                  # Chinese TikTok version
+    
+    # Meta/Facebook family
+    r'facebookexternalhit',     # Facebook link preview
+    r'facebookcatalog',         # Facebook catalog
+    r'instagrambot',            # Instagram crawler
+    r'meta.*bot',               # Meta variants
+    
+    # Twitter/X
     r'twitterbot',
+    r'x.*bot',                  # New X branding
+    
+    # Other major platforms
     r'linkedinbot',
     r'whatsapp',
     r'telegrambot',
-    r'applebot',
+    r'snapchat.*bot',
+    r'discordbot',
+    r'slackbot',
+    r'pinterestbot',
+    r'redditbot',
+    
+    # Search engines
     r'googlebot',
     r'bingbot',
-    r'slackbot',
-    r'discordbot',
+    r'applebot',
+    r'baiduspider',
+    r'yandexbot',
+    
+    # Generic patterns
     r'crawler',
     r'spider',
     r'scraper',
-    r'bot/'
+    r'bot/',
+    r'headless',
+    r'phantom',
+    r'selenium',
+    r'puppeteer'
 ]
+
+# TikTok-specific user agent patterns for enhanced detection
+TIKTOK_SPECIFIC_PATTERNS = [
+    r'bytespider',
+    r'tiktok',
+    r'musically',
+    r'bytedance',
+    r'douyin',
+    r'aweme',                   # TikTok internal name
+    r'com\.zhiliaoapp\.musically',  # TikTok mobile app identifier
+    r'musical_ly',
+]
+
+# Platform IP ranges (simplified - in production, use complete CIDR blocks)
+PLATFORM_IP_RANGES = {
+    'tiktok': [
+        '103.216.0.0/16',       # TikTok Singapore
+        '161.117.0.0/16',       # ByteDance US
+        '49.51.0.0/16',         # TikTok Asia Pacific
+    ],
+    'facebook': [
+        '31.13.0.0/16',         # Facebook main
+        '66.220.0.0/16',        # Facebook crawlers
+        '69.63.0.0/16',         # Facebook infrastructure
+    ],
+    'google': [
+        '66.249.0.0/16',        # Googlebot
+        '64.233.0.0/16',        # Google services
+    ]
+}
 
 def is_bot_user_agent(user_agent):
     """Check if user agent matches known bot patterns"""
@@ -35,6 +95,107 @@ def is_bot_user_agent(user_agent):
         if re.search(pattern, user_agent_lower):
             return True
     return False
+
+def is_tiktok_bot(user_agent, ip_address=None):
+    """Enhanced TikTok-specific bot detection"""
+    if not user_agent:
+        return True
+    
+    user_agent_lower = user_agent.lower()
+    
+    # Check TikTok-specific patterns
+    for pattern in TIKTOK_SPECIFIC_PATTERNS:
+        if re.search(pattern, user_agent_lower):
+            return True
+    
+    # Check IP ranges if available
+    if ip_address and is_platform_ip(ip_address, 'tiktok'):
+        return True
+    
+    return False
+
+def is_platform_ip(ip_address, platform):
+    """Check if IP address belongs to a specific platform"""
+    if not ip_address or platform not in PLATFORM_IP_RANGES:
+        return False
+    
+    try:
+        ip_obj = ipaddress.ip_address(ip_address)
+        for cidr in PLATFORM_IP_RANGES[platform]:
+            network = ipaddress.ip_network(cidr, strict=False)
+            if ip_obj in network:
+                return True
+    except (ValueError, ipaddress.AddressValueError):
+        pass
+    
+    return False
+
+def detect_platform_from_request(user_agent=None, referrer=None, ip_address=None):
+    """Comprehensive platform detection from request data"""
+    if not user_agent:
+        user_agent = request.headers.get('User-Agent', '')
+    if not referrer:
+        referrer = request.headers.get('Referer', '')
+    if not ip_address:
+        ip_address = request.remote_addr
+    
+    user_agent_lower = user_agent.lower()
+    referrer_lower = referrer.lower() if referrer else ''
+    
+    # TikTok detection
+    if (any(re.search(pattern, user_agent_lower) for pattern in TIKTOK_SPECIFIC_PATTERNS) or
+        'tiktok.com' in referrer_lower or 'musically.com' in referrer_lower or
+        is_platform_ip(ip_address, 'tiktok')):
+        return 'tiktok'
+    
+    # Instagram/Facebook detection
+    if ('instagram' in user_agent_lower or 'instagram.com' in referrer_lower or
+        'facebook' in user_agent_lower or 'facebook.com' in referrer_lower or
+        is_platform_ip(ip_address, 'facebook')):
+        return 'instagram' if 'instagram' in (user_agent_lower + referrer_lower) else 'facebook'
+    
+    # Twitter/X detection
+    if ('twitter' in user_agent_lower or 'twitter.com' in referrer_lower or
+        'x.com' in referrer_lower):
+        return 'twitter'
+    
+    # Fallback to referrer-based detection
+    return get_platform_from_referrer(referrer)
+
+def analyze_request_fingerprint():
+    """Analyze request characteristics for bot detection"""
+    suspicion_score = 0
+    
+    # Check missing headers that real browsers typically send
+    expected_headers = ['Accept', 'Accept-Language', 'Accept-Encoding', 'Connection']
+    missing_headers = [h for h in expected_headers if not request.headers.get(h)]
+    suspicion_score += len(missing_headers) * 10
+    
+    # Check for overly simple Accept header
+    accept_header = request.headers.get('Accept', '')
+    if accept_header in ['*/*', 'text/html', '']:
+        suspicion_score += 15
+    
+    # Check for missing Accept-Language
+    if not request.headers.get('Accept-Language'):
+        suspicion_score += 20
+    
+    # Check for suspicious connection patterns
+    connection = request.headers.get('Connection', '').lower()
+    if connection in ['close', '']:
+        suspicion_score += 10
+    
+    # Check User-Agent length and complexity
+    user_agent = request.headers.get('User-Agent', '')
+    if len(user_agent) < 50:  # Real browsers have longer user agents
+        suspicion_score += 25
+    
+    # Check for common automation tool signatures
+    automation_indicators = ['headless', 'phantom', 'selenium', 'puppeteer', 'playwright']
+    if any(indicator in user_agent.lower() for indicator in automation_indicators):
+        suspicion_score += 50
+    
+    return suspicion_score
 
 def get_platform_from_referrer(referrer):
     """Detect platform from referrer"""
@@ -69,7 +230,7 @@ def get_platform_from_user_agent(user_agent):
         return 'unknown'
 
 def is_suspicious_request():
-    """Check if request appears suspicious"""
+    """Enhanced suspicious request detection using fingerprinting"""
     user_agent = request.headers.get('User-Agent', '')
     
     # Very short or missing user agent
@@ -83,7 +244,10 @@ def is_suspicious_request():
         r'python',
         r'requests',
         r'httpie',
-        r'postman'
+        r'postman',
+        r'scrapy',
+        r'mechanize',
+        r'urllib'
     ]
     
     user_agent_lower = user_agent.lower()
@@ -91,7 +255,11 @@ def is_suspicious_request():
         if pattern in user_agent_lower:
             return True
     
-    return False
+    # Use advanced fingerprinting
+    suspicion_score = analyze_request_fingerprint()
+    
+    # Consider suspicious if score is above threshold
+    return suspicion_score >= 30
 
 def send_magic_link_email(email, token):
     """Send magic link email for authentication"""
