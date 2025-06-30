@@ -1,6 +1,7 @@
 import re
 import urllib.request
 import urllib.error
+import dns.resolver
 from flask import request
 from flask_mail import Message
 from app import mail
@@ -144,7 +145,28 @@ def truncate_ip(ip_address):
         parts = ip_address.split('.')
         return '.'.join(parts[:3]) + '.0'
 
-def verify_domain_ownership(domain, verification_token):
+def verify_domain_ownership(domain, verification_token, method='dns'):
+    """Verify domain ownership via DNS TXT record or file-based verification"""
+    if method == 'dns':
+        return verify_domain_dns(domain, verification_token)
+    else:
+        return verify_domain_file(domain, verification_token)
+
+def verify_domain_dns(domain, verification_token):
+    """Verify domain ownership via DNS TXT record"""
+    try:
+        txt_records = dns.resolver.resolve(domain, 'TXT')
+        expected_record = f"smartlink-verify={verification_token}"
+        
+        for record in txt_records:
+            txt_value = record.to_text().strip('"')
+            if txt_value == expected_record:
+                return True
+        return False
+    except Exception:
+        return False
+
+def verify_domain_file(domain, verification_token):
     """Verify domain ownership via file-based verification"""
     try:
         verification_url = f"http://{domain}/.well-known/smartlink-verification.txt"

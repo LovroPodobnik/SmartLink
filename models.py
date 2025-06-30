@@ -2,6 +2,7 @@ from app import db
 from datetime import datetime, timedelta
 import secrets
 import string
+import os
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -98,6 +99,7 @@ class CustomDomain(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     verified_at = db.Column(db.DateTime, nullable=True)
+    verification_method = db.Column(db.String(20), default='dns')  # 'dns' or 'file'
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -111,6 +113,11 @@ class CustomDomain(db.Model):
     def get_verification_txt_record(self):
         """Get the TXT record value for domain verification"""
         return f"smartlink-verify={self.verification_token}"
+    
+    def get_cname_record_value(self):
+        """Get the CNAME record value for routing"""
+        # This should be your Railway app URL
+        return os.environ.get('APP_DOMAIN', 'web-production-b9e4.up.railway.app')
     
     def get_verification_file_content(self):
         """Get the verification file content for file-based verification"""

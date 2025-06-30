@@ -36,6 +36,9 @@ MAIL_DEFAULT_SENDER=noreply@yourdomain.com
 # Production settings
 FLASK_ENV=production
 DEBUG=False
+
+# App Domain (replace with your actual Railway/deployment URL)
+APP_DOMAIN=your-app.railway.app
 """
     
     with open('.env.template', 'w') as f:

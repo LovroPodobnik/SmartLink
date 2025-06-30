@@ -368,7 +368,7 @@ def verify_domain(domain_id):
     if not domain:
         abort(404)
     
-    return render_template('verify_domain.html', domain=domain)
+    return render_template('verify_domain_simple.html', domain=domain)
 
 @app.route('/domains/<int:domain_id>/check', methods=['POST'])
 @login_required
@@ -380,8 +380,9 @@ def check_domain_verification(domain_id):
     if not domain:
         abort(404)
     
-    # Verify domain ownership
-    if verify_domain_ownership(domain.domain, domain.verification_token):
+    # Verify domain ownership using the configured method
+    verification_method = domain.verification_method or 'dns'
+    if verify_domain_ownership(domain.domain, domain.verification_token, verification_method):
         domain.is_verified = True
         domain.verified_at = datetime.utcnow()
         db.session.commit()
@@ -389,7 +390,8 @@ def check_domain_verification(domain_id):
         flash(f'Domain {domain.domain} successfully verified!', 'success')
         return redirect(url_for('manage_domains'))
     else:
-        flash('Domain verification failed. Please check your verification file.', 'error')
+        method_name = 'DNS TXT record' if verification_method == 'dns' else 'verification file'
+        flash(f'Domain verification failed. Please check your {method_name}.', 'error')
         return redirect(url_for('verify_domain', domain_id=domain.id))
 
 @app.route('/domains/<int:domain_id>/delete', methods=['POST'])
