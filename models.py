@@ -100,7 +100,7 @@ class CustomDomain(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     verified_at = db.Column(db.DateTime, nullable=True)
     verification_method = db.Column(db.String(20), default='dns')  # 'dns' or 'file'
-    railway_domain_id = db.Column(db.String(64), nullable=True)  # Railway domain ID for API management
+    # railway_domain_id = db.Column(db.String(64), nullable=True)  # TODO: Add after database migration
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -411,9 +411,10 @@ def check_domain_verification(domain_id):
             if railway_result:
                 # Railway domain successfully added
                 domain.ssl_enabled = True  # Railway auto-provisions SSL
-                domain.railway_domain_id = railway_result.get('id')  # Store Railway ID
+                # TODO: Store railway_domain_id after database migration
                 
-                app.logger.info(f"Domain {domain.domain} added to Railway with ID {domain.railway_domain_id}")
+                railway_id = railway_result.get('id')
+                app.logger.info(f"Domain {domain.domain} added to Railway with ID {railway_id}")
                 flash(f'Domain {domain.domain} successfully verified and activated! SSL enabled automatically.', 'success')
             else:
                 app.logger.warning(f"Domain {domain.domain} verified but Railway setup failed")
@@ -441,18 +442,11 @@ def delete_domain(domain_id):
         abort(404)
     
     # Remove from Railway if it was added there
-    if domain.railway_domain_id:
-        try:
-            railway_manager = get_railway_manager()
-            success = railway_manager.delete_custom_domain(domain.railway_domain_id)
-            
-            if success:
-                app.logger.info(f"Domain {domain.domain} removed from Railway")
-            else:
-                app.logger.warning(f"Failed to remove domain {domain.domain} from Railway")
-                
-        except Exception as e:
-            app.logger.error(f"Railway API error while deleting domain {domain.domain}: {str(e)}")
+    # TODO: Implement Railway domain deletion after storing railway_domain_id
+    try:
+        app.logger.info(f"Domain {domain.domain} being deleted - Railway cleanup may be needed")
+    except Exception as e:
+        app.logger.error(f"Error during domain deletion for {domain.domain}: {str(e)}")
     
     db.session.delete(domain)
     db.session.commit()
