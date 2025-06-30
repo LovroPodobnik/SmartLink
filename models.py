@@ -12,6 +12,7 @@ class User(db.Model):
     # Relationships
     smart_links = db.relationship('SmartLink', backref='user', lazy=True)
     login_tokens = db.relationship('LoginToken', backref='user', lazy=True)
+    custom_domains = db.relationship('CustomDomain', backref='user', lazy=True)
 
 class LoginToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -73,3 +74,31 @@ class Click(db.Model):
     # Additional tracking
     country = db.Column(db.String(2))
     platform = db.Column(db.String(20))  # 'tiktok', 'instagram', 'other'
+
+class CustomDomain(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    domain = db.Column(db.String(255), unique=True, nullable=False)
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(64), nullable=False)
+    ssl_enabled = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    verified_at = db.Column(db.DateTime, nullable=True)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.verification_token:
+            self.verification_token = self.generate_verification_token()
+    
+    @staticmethod
+    def generate_verification_token():
+        return ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
+    
+    def get_verification_txt_record(self):
+        """Get the TXT record value for domain verification"""
+        return f"smartlink-verify={self.verification_token}"
+    
+    def get_verification_file_content(self):
+        """Get the verification file content for file-based verification"""
+        return self.verification_token

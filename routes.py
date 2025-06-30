@@ -1,8 +1,8 @@
 from flask import render_template, request, redirect, url_for, flash, session, jsonify, abort
 from datetime import datetime, timedelta
 from app import app, db
-from models import User, SmartLink, Click, LoginToken
-from forms import LoginForm, SmartLinkForm
+from models import User, SmartLink, Click, LoginToken, CustomDomain
+from forms import LoginForm, SmartLinkForm, CustomDomainForm
 from utils import (
     is_bot_user_agent, get_platform_from_referrer, get_platform_from_user_agent,
     is_suspicious_request, send_magic_link_email, truncate_ip

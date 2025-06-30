@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, URLField
-from wtforms.validators import DataRequired, Email, URL, Length
+from wtforms.validators import DataRequired, Email, URL, Length, Regexp
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -12,3 +12,12 @@ class SmartLinkForm(FlaskForm):
     safe_url = URLField('Safe Page URL (Optional)', validators=[URL(require_tld=False)])
     use_js_challenge = BooleanField('Use JavaScript Challenge', default=True)
     direct_from_tiktok = BooleanField('Direct from TikTok', default=True)
+
+class CustomDomainForm(FlaskForm):
+    domain = StringField('Domain Name', 
+                        validators=[
+                            DataRequired(), 
+                            Length(max=255),
+                            Regexp(r'^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.([a-zA-Z]{2,}\.?)*[a-zA-Z]{2,}$', 
+                                  message="Please enter a valid domain name (e.g., links.yoursite.com)")
+                        ])
