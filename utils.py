@@ -136,3 +136,24 @@ def truncate_ip(ip_address):
     else:  # IPv4
         parts = ip_address.split('.')
         return '.'.join(parts[:3]) + '.0'
+
+def verify_domain_ownership(domain, verification_token):
+    """Verify domain ownership via file-based verification"""
+    try:
+        verification_url = f"http://{domain}/.well-known/smartlink-verification.txt"
+        
+        req = urllib.request.Request(verification_url)
+        with urllib.request.urlopen(req, timeout=10) as response:
+            content = response.read().decode('utf-8').strip()
+            return content == verification_token
+    except (urllib.error.URLError, urllib.error.HTTPError, Exception):
+        return False
+
+def get_domain_from_request():
+    """Get the domain from the current request"""
+    return request.headers.get('Host', '').lower()
+
+def is_custom_domain(domain):
+    """Check if a domain is a custom domain (not the default SmartLink domain)"""
+    default_domains = ['localhost:5000', '127.0.0.1:5000', 'smartlink.app']
+    return domain not in default_domains and domain.endswith('.replit.app') == False

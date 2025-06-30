@@ -113,6 +113,7 @@ SmartLink is a Flask-based web application designed for content creators who nee
 ```
 Changelog:
 - June 30, 2025. Initial setup
+- June 30, 2025. Added custom domain functionality with verification system
 ```
 
 ## User Preferences

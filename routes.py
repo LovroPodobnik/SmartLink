@@ -5,7 +5,8 @@ from models import User, SmartLink, Click, LoginToken, CustomDomain
 from forms import LoginForm, SmartLinkForm, CustomDomainForm
 from utils import (
     is_bot_user_agent, get_platform_from_referrer, get_platform_from_user_agent,
-    is_suspicious_request, send_magic_link_email, truncate_ip
+    is_suspicious_request, send_magic_link_email, truncate_ip,
+    verify_domain_ownership, get_domain_from_request, is_custom_domain
 )
 
 @app.route('/')
@@ -285,6 +286,95 @@ def api_stats():
         'human_clicks': human_clicks or 0,
         'bot_clicks': (total_clicks or 0) - (human_clicks or 0)
     })
+
+@app.route('/domains')
+@login_required
+def manage_domains():
+    """Manage custom domains"""
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+    domains = CustomDomain.query.filter_by(user_id=user_id).all()
+    
+    return render_template('domains.html', user=user, domains=domains)
+
+@app.route('/domains/add', methods=['GET', 'POST'])
+@login_required
+def add_domain():
+    """Add a new custom domain"""
+    form = CustomDomainForm()
+    
+    if form.validate_on_submit():
+        domain = form.domain.data.lower().strip()
+        
+        # Check if domain already exists
+        existing_domain = CustomDomain.query.filter_by(domain=domain).first()
+        if existing_domain:
+            flash('This domain is already registered.', 'error')
+            return redirect(url_for('add_domain'))
+        
+        # Create new domain
+        custom_domain = CustomDomain(
+            user_id=session['user_id'],
+            domain=domain
+        )
+        
+        db.session.add(custom_domain)
+        db.session.commit()
+        
+        flash(f'Domain {domain} added! Please verify ownership to activate it.', 'success')
+        return redirect(url_for('verify_domain', domain_id=custom_domain.id))
+    
+    return render_template('add_domain.html', form=form)
+
+@app.route('/domains/<int:domain_id>/verify')
+@login_required
+def verify_domain(domain_id):
+    """Show domain verification instructions"""
+    user_id = session['user_id']
+    domain = CustomDomain.query.filter_by(id=domain_id, user_id=user_id).first()
+    
+    if not domain:
+        abort(404)
+    
+    return render_template('verify_domain.html', domain=domain)
+
+@app.route('/domains/<int:domain_id>/check', methods=['POST'])
+@login_required
+def check_domain_verification(domain_id):
+    """Check if domain verification is complete"""
+    user_id = session['user_id']
+    domain = CustomDomain.query.filter_by(id=domain_id, user_id=user_id).first()
+    
+    if not domain:
+        abort(404)
+    
+    # Verify domain ownership
+    if verify_domain_ownership(domain.domain, domain.verification_token):
+        domain.is_verified = True
+        domain.verified_at = datetime.utcnow()
+        db.session.commit()
+        
+        flash(f'Domain {domain.domain} successfully verified!', 'success')
+        return redirect(url_for('manage_domains'))
+    else:
+        flash('Domain verification failed. Please check your verification file.', 'error')
+        return redirect(url_for('verify_domain', domain_id=domain.id))
+
+@app.route('/domains/<int:domain_id>/delete', methods=['POST'])
+@login_required
+def delete_domain(domain_id):
+    """Delete a custom domain"""
+    user_id = session['user_id']
+    domain = CustomDomain.query.filter_by(id=domain_id, user_id=user_id).first()
+    
+    if not domain:
+        abort(404)
+    
+    db.session.delete(domain)
+    db.session.commit()
+    
+    flash(f'Domain {domain.domain} deleted successfully.', 'success')
+    return redirect(url_for('manage_domains'))
 
 @app.errorhandler(404)
 def not_found(error):
