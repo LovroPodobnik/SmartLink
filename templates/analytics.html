@@ -183,7 +183,7 @@ const dailyClicksCtx = document.getElementById('dailyClicksChart').getContext('2
 const dailyClicksData = {
     labels: [
         {% for click in daily_clicks %}
-            '{{ click.date.strftime("%m/%d") }}'{% if not loop.last %},{% endif %}
+            '{{ click.date }}'{% if not loop.last %},{% endif %}
         {% endfor %}
     ],
     datasets: [
@@ -192,6 +192,8 @@ const dailyClicksData = {
             data: [
                 {% for click in daily_clicks %}
                     {{ click.human or 0 }}{% if not loop.last %},{% endif %}
+                {% else %}
+                    0
                 {% endfor %}
             ],
             backgroundColor: 'rgba(25, 135, 84, 0.8)',
@@ -203,6 +205,8 @@ const dailyClicksData = {
             data: [
                 {% for click in daily_clicks %}
                     {{ click.bot or 0 }}{% if not loop.last %},{% endif %}
+                {% else %}
+                    0
                 {% endfor %}
             ],
             backgroundColor: 'rgba(255, 193, 7, 0.8)',
@@ -214,6 +218,8 @@ const dailyClicksData = {
             data: [
                 {% for click in daily_clicks %}
                     {{ click.suspect or 0 }}{% if not loop.last %},{% endif %}
+                {% else %}
+                    0
                 {% endfor %}
             ],
             backgroundColor: 'rgba(220, 53, 69, 0.8)',
