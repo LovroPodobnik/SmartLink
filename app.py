@@ -76,6 +76,7 @@ else:
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', '587'))
 app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'false').lower() in ['true', 'on', '1']
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@smartlink.app')
@@ -89,15 +90,17 @@ import models
 import routes
 import health_check
 
-# Initialize database tables
-with app.app_context():
-    try:
-        db.create_all()
-        app.logger.info("Database tables created successfully")
-    except Exception as e:
-        app.logger.error(f"Database initialization failed: {e}")
-        if env == 'development':
-            raise
-        else:
-            # In production, continue without crashing but log the error
-            app.logger.error("Continuing without database initialization")
+# Initialize database tables only if not on Vercel
+# Vercel serverless functions shouldn't create tables on every request
+if not os.environ.get('VERCEL_ENV'):
+    with app.app_context():
+        try:
+            db.create_all()
+            app.logger.info("Database tables created successfully")
+        except Exception as e:
+            app.logger.error(f"Database initialization failed: {e}")
+            if env == 'development':
+                raise
+            else:
+                # In production, continue without crashing but log the error
+                app.logger.error("Continuing without database initialization")

@@ -68,9 +68,9 @@ MAIL_PASSWORD=your-app-password
 MAIL_DEFAULT_SENDER=noreply@yourdomain.com
 
 # Vercel API (for custom domains)
-VERCEL_API_TOKEN=your-vercel-api-token
-VERCEL_PROJECT_ID=prj_xxxxx (from Vercel dashboard)
-VERCEL_APP_DOMAIN=your-app.vercel.app
+VERCEL_API_TOKEN=DISFXufYI7yPTwvFWx6Yispp
+VERCEL_PROJECT_ID=prj_8FevNPSg9gVzpxQuonBjhPCL91hT
+VERCEL_APP_DOMAIN=smart-ticker.vercel.app
 
 # Production
 FLASK_ENV=production
