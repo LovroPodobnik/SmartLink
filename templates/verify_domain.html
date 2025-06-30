@@ -72,40 +72,80 @@
                         </div>
                     </div>
                     
-                    <!-- DNS Configuration -->
+                    <!-- Setup Instructions -->
                     <div class="card mt-4">
                         <div class="card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-cog me-2"></i>DNS Configuration (Optional)
+                                <i class="fas fa-cog me-2"></i>Domain Setup - Choose Your Method
                             </h5>
                         </div>
                         <div class="card-body">
-                            <p>After verification, you'll need to point your domain to SmartLink:</p>
-                            
-                            <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Record Type</th>
-                                            <th>Name</th>
-                                            <th>Value</th>
-                                            <th>TTL</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><code>CNAME</code></td>
-                                            <td><code>{{ domain.domain.split('.')[0] }}</code></td>
-                                            <td><code>smartlink.app</code></td>
-                                            <td><code>300</code></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Important:</strong> After verification, you need to configure your domain to serve SmartLink content.
                             </div>
                             
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>Note:</strong> DNS changes can take up to 24 hours to propagate worldwide.
+                            <!-- Method 1: Reverse Proxy -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Method 1: Reverse Proxy (Recommended)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p>Configure your web server to proxy requests to SmartLink:</p>
+                                    
+                                    <h6>Apache (.htaccess):</h6>
+                                    <pre class="bg-light p-3 rounded"><code>RewriteEngine On
+RewriteRule ^(.*)$ {{ request.url_root }}$1 [P,L]</code></pre>
+                                    
+                                    <h6>Nginx:</h6>
+                                    <pre class="bg-light p-3 rounded"><code>location / {
+    proxy_pass {{ request.url_root }};
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}</code></pre>
+                                </div>
+                            </div>
+                            
+                            <!-- Method 2: DNS Forwarding -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Method 2: DNS Forwarding</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p>Point your domain to our servers (requires DNS provider support):</p>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Record Type</th>
+                                                    <th>Name</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><code>CNAME</code></td>
+                                                    <td><code>{{ domain.domain }}</code></td>
+                                                    <td><code>{{ request.host }}</code></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Note:</strong> This method may not work with all hosting providers. Reverse proxy is more reliable.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Test Your Setup -->
+                            <div class="alert alert-success mt-3">
+                                <h6><i class="fas fa-vial me-2"></i>Test Your Setup</h6>
+                                <p class="mb-2">After configuring your server, test that routing works by visiting:</p>
+                                <code>http://{{ domain.domain }}/test</code>
+                                <p class="mt-2 mb-0">
+                                    <small>You should see a "Domain routing is working!" message. If not, check your server configuration.</small>
+                                </p>
                             </div>
                         </div>
                     </div>

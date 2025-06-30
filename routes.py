@@ -216,10 +216,22 @@ def analytics(short_code):
 @app.route('/<short_code>')
 def smart_redirect(short_code):
     """Smart redirect endpoint - core functionality"""
+    # Get the current domain from the request
+    current_domain = request.host
+    
+    # Find the smart link by short code
     smart_link = SmartLink.query.filter_by(short_code=short_code, is_active=True).first()
     
     if not smart_link:
         abort(404)
+    
+    # Check if this request is coming from a custom domain
+    if smart_link.custom_domain and smart_link.custom_domain.domain != current_domain:
+        # If the link has a custom domain but request is from different domain, redirect to correct domain
+        if smart_link.custom_domain.is_verified and smart_link.custom_domain.is_active:
+            protocol = 'https' if smart_link.custom_domain.ssl_enabled else 'http'
+            correct_url = f"{protocol}://{smart_link.custom_domain.domain}/{short_code}"
+            return redirect(correct_url, code=301)
     
     # Get request details
     user_agent = request.headers.get('User-Agent', '')
@@ -395,6 +407,19 @@ def delete_domain(domain_id):
     
     flash(f'Domain {domain.domain} deleted successfully.', 'success')
     return redirect(url_for('manage_domains'))
+
+@app.route('/test')
+def test_domain():
+    """Test endpoint to check if custom domain routing is working"""
+    current_domain = request.host
+    return f"""
+    <h1>SmartLink Domain Test</h1>
+    <p><strong>Current Domain:</strong> {current_domain}</p>
+    <p><strong>Status:</strong> ✅ Domain routing is working!</p>
+    <p>If you can see this page on your custom domain, the routing is configured correctly.</p>
+    <hr>
+    <small>Now create a SmartLink using this domain and test the short URLs.</small>
+    """
 
 @app.errorhandler(404)
 def not_found(error):
