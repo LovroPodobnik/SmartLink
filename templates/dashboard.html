@@ -26,7 +26,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-title">Total Links</h6>
-                            <h2 class="mb-0">{{ smart_links|length }}</h2>
+                            <h2 class="mb-0">{{ stats.total_links }}</h2>
                         </div>
                         <i class="fas fa-link fa-2x opacity-75"></i>
                     </div>
@@ -40,7 +40,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-title">Human Clicks</h6>
-                            <h2 class="mb-0">{{ smart_links|sum(attribute='1.human_clicks') or 0 }}</h2>
+                            <h2 class="mb-0">{{ stats.human_clicks }}</h2>
                         </div>
                         <i class="fas fa-user fa-2x opacity-75"></i>
                     </div>
@@ -54,7 +54,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-title">Bot Clicks</h6>
-                            <h2 class="mb-0">{{ smart_links|sum(attribute='1.bot_clicks') or 0 }}</h2>
+                            <h2 class="mb-0">{{ stats.bot_clicks }}</h2>
                         </div>
                         <i class="fas fa-robot fa-2x opacity-75"></i>
                     </div>
@@ -68,7 +68,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-title">Total Clicks</h6>
-                            <h2 class="mb-0">{{ smart_links|sum(attribute='1.total_clicks') or 0 }}</h2>
+                            <h2 class="mb-0">{{ stats.total_clicks }}</h2>
                         </div>
                         <i class="fas fa-mouse-pointer fa-2x opacity-75"></i>
                     </div>
@@ -85,7 +85,7 @@
                     <h5 class="mb-0">Your Smart Links</h5>
                 </div>
                 <div class="card-body p-0">
-                    {% if smart_links %}
+                    {% if links_with_stats %}
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
@@ -100,9 +100,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for link_data in smart_links %}
-                                        {% set link = link_data[0] %}
-                                        {% set stats = link_data[1:] %}
+                                    {% for link_data in links_with_stats %}
+                                        {% set link = link_data.link %}
                                         <tr>
                                             <td>
                                                 <div>
@@ -125,12 +124,12 @@
                                                 </a>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ stats[0] or 0 }}</span>
+                                                <span class="badge bg-primary">{{ link_data.total_clicks }}</span>
                                             </td>
                                             <td>
                                                 <div class="d-flex gap-1">
-                                                    <span class="badge bg-success">{{ stats[1] or 0 }} H</span>
-                                                    <span class="badge bg-warning">{{ stats[2] or 0 }} B</span>
+                                                    <span class="badge bg-success">{{ link_data.human_clicks }} H</span>
+                                                    <span class="badge bg-warning">{{ link_data.bot_clicks }} B</span>
                                                 </div>
                                             </td>
                                             <td>

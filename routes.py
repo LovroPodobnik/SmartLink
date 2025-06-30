@@ -94,15 +94,39 @@ def dashboard():
     user_id = session['user_id']
     user = User.query.get(user_id)
     
-    # Get user's smart links with click counts
-    smart_links = db.session.query(
-        SmartLink,
-        db.func.count(Click.id).label('total_clicks'),
-        db.func.sum(db.case((Click.click_type == 'human', 1), else_=0)).label('human_clicks'),
-        db.func.sum(db.case((Click.click_type == 'bot', 1), else_=0)).label('bot_clicks')
-    ).outerjoin(Click).filter(SmartLink.user_id == user_id).group_by(SmartLink.id).all()
+    # Get user's smart links
+    smart_links = SmartLink.query.filter_by(user_id=user_id).all()
     
-    return render_template('dashboard.html', user=user, smart_links=smart_links)
+    # Calculate stats for each link
+    links_with_stats = []
+    total_human_clicks = 0
+    total_bot_clicks = 0
+    total_all_clicks = 0
+    
+    for link in smart_links:
+        total_clicks = Click.query.filter_by(smart_link_id=link.id).count()
+        human_clicks = Click.query.filter_by(smart_link_id=link.id, click_type='human').count()
+        bot_clicks = Click.query.filter_by(smart_link_id=link.id, click_type='bot').count()
+        
+        links_with_stats.append({
+            'link': link,
+            'total_clicks': total_clicks,
+            'human_clicks': human_clicks,
+            'bot_clicks': bot_clicks
+        })
+        
+        total_human_clicks += human_clicks
+        total_bot_clicks += bot_clicks
+        total_all_clicks += total_clicks
+    
+    stats = {
+        'total_links': len(smart_links),
+        'total_clicks': total_all_clicks,
+        'human_clicks': total_human_clicks,
+        'bot_clicks': total_bot_clicks
+    }
+    
+    return render_template('dashboard.html', user=user, links_with_stats=links_with_stats, stats=stats)
 
 @app.route('/create', methods=['GET', 'POST'])
 @login_required
