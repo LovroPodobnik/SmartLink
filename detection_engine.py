@@ -204,9 +204,11 @@ class AdvancedDetectionEngine:
         
         # Instagram/Facebook specific checks
         for pattern in self.instagram_bot_signatures['user_agents']:
-            if re.search(pattern, ua_lower):
+            # Some patterns need case-sensitive matching (e.g., [FBAN/)
+            if re.search(pattern, user_agent, re.IGNORECASE):
                 confidence = max(confidence, 0.95)
-                return {'confidence': confidence, 'platform': 'instagram', 'reason': 'instagram_bot_ua'}
+                platform = 'facebook' if any(fb in pattern.lower() for fb in ['fban', 'fbav', 'fbios', 'fbdv', '\[fb']) else 'instagram'
+                return {'confidence': confidence, 'platform': platform, 'reason': f'{platform}_bot_ua'}
         
         # Length and complexity analysis
         if len(user_agent) < 20:

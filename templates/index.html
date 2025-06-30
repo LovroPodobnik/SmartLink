@@ -1,87 +1,168 @@
 {% extends "base.html" %}
 
+{% block head_extra %}
+<style>
+    /* 
+      In a real app, move this to a dedicated CSS file.
+      This CSS creates the new dark theme with OF-inspired colors.
+    */
+    :root {
+        --dark-bg: #121212;
+        --dark-card: #1e1e1e;
+        --of-blue: #00aff0;
+        --bright-pink: #f9008e;
+        --text-light: #f0f0f0;
+        --text-muted: #888;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--text-light);
+    }
+
+    .bg-gradient-dark {
+        background: linear-gradient(145deg, #1e1e1e 0%, #121212 100%);
+    }
+
+    .text-of-blue { color: var(--of-blue); }
+    .text-bright-pink { color: var(--bright-pink); }
+
+    /* Hero Section */
+    .hero-section h1 {
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    .hero-section .lead {
+        color: var(--text-muted);
+        max-width: 500px;
+    }
+    
+    .btn-cta {
+        background-color: var(--bright-pink);
+        color: white;
+        font-weight: bold;
+        padding: 1rem 2rem;
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(249, 0, 142, 0.2);
+        color: white;
+    }
+    
+    .hero-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+    }
+    .hero-stats i {
+        color: var(--of-blue);
+    }
+
+    /* How It Works Flow */
+    .flow-step {
+        text-align: center;
+    }
+    .flow-icon {
+        width: 80px;
+        height: 80px;
+        background-color: var(--dark-card);
+        border: 2px solid var(--of-blue);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
+        font-size: 2rem;
+        color: var(--of-blue);
+        box-shadow: 0 0 15px rgba(0, 175, 240, 0.2);
+    }
+
+    /* Comparison Section */
+    .comparison-card {
+        background-color: var(--dark-card);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid #333;
+        height: 100%;
+    }
+    .comparison-card.bad {
+        border-left: 5px solid #dc3545; /* Bootstrap danger red */
+    }
+    .comparison-card.good {
+        border-left: 5px solid var(--of-blue);
+    }
+    .flow-path {
+        background-color: #2a2a2a;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-family: 'Courier New', Courier, monospace;
+        word-break: break-all;
+    }
+    .drop-off-rate {
+        font-weight: bold;
+        color: #dc3545;
+    }
+    .conversion-rate {
+        font-weight: bold;
+        color: var(--of-blue);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="hero-section bg-gradient text-white py-5">
-    <div class="container">
-        <div class="row align-items-center min-vh-75">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">
-                    Smart Link Cloaking for Content Creators
+<!-- HERO SECTION -->
+<div class="hero-section bg-gradient-dark py-5">
+    <div class="container col-xl-10 col-xxl-8 px-4 py-5">
+        <div class="row align-items-center g-lg-5 py-5">
+            <div class="col-lg-7 text-center text-lg-start">
+                <h1 class="display-4 fw-bold lh-1 mb-4">
+                    The Unbannable Link for Serious Creators
                 </h1>
-                <p class="lead mb-4">
-                    Bypass platform restrictions with intelligent bot detection. 
-                    Send crawlers to safe pages while directing real users straight to your content.
+                <p class="col-lg-10 lead mb-4">
+                    Stop losing subscribers to broken links and platform bans. SmartLink protects your income by sending bots to a safe page while fans go directly to your content.
                 </p>
-                
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-shield-alt text-warning me-3 fa-2x"></i>
-                            <div>
-                                <h5 class="mb-1">Bot Protection</h5>
-                                <small>Automatic crawler detection</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-bolt text-warning me-3 fa-2x"></i>
-                            <div>
-                                <h5 class="mb-1">Lightning Fast</h5>
-                                <small>&lt;50ms redirect time</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-chart-line text-warning me-3 fa-2x"></i>
-                            <div>
-                                <h5 class="mb-1">Analytics</h5>
-                                <small>Track human vs bot clicks</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="fas fa-mobile-alt text-warning me-3 fa-2x"></i>
-                            <div>
-                                <h5 class="mb-1">Mobile Optimized</h5>
-                                <small>Perfect for TikTok & Instagram</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="d-flex gap-3">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
                     {% if not session.user_id %}
-                        <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg px-4">
-                            <i class="fas fa-rocket me-2"></i>Get Started Free
+                        <a href="{{ url_for('login') }}" class="btn btn-cta btn-lg">
+                            Get Your Smart Link <i class="fas fa-arrow-right ms-2"></i>
                         </a>
                     {% else %}
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-warning btn-lg px-4">
-                            <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-cta btn-lg">
+                            Go To Dashboard <i class="fas fa-arrow-right ms-2"></i>
                         </a>
                     {% endif %}
                 </div>
+                <div class="hero-stats">
+                    <span><i class="fas fa-check-circle me-2"></i>Bypass Bans</span>
+                    <span><i class="fas fa-check-circle me-2"></i>Increase Clicks</span>
+                    <span><i class="fas fa-check-circle me-2"></i>Instant Redirects</span>
+                </div>
             </div>
-            
-            <div class="col-lg-6">
-                <div class="text-center">
-                    <div class="bg-white bg-opacity-10 rounded-3 p-4 backdrop-blur">
-                        <h3 class="mb-4">How It Works</h3>
-                        <div class="row text-center">
-                            <div class="col-4">
-                                <div class="step-circle mx-auto mb-2">1</div>
-                                <small>Create Smart Link</small>
-                            </div>
-                            <div class="col-4">
-                                <div class="step-circle mx-auto mb-2">2</div>
-                                <small>Share on Socials</small>
-                            </div>
-                            <div class="col-4">
-                                <div class="step-circle mx-auto mb-2">3</div>
-                                <small>Users Reach Target</small>
-                            </div>
+            <div class="col-md-10 mx-auto col-lg-5 mt-5 mt-lg-0">
+                <div class="p-4 p-md-5 rounded-3" style="background-color: rgba(0,0,0,0.2);">
+                    <h3 class="text-center mb-4 text-of-blue">How It Works</h3>
+                    <div class="row g-4">
+                        <div class="col-12 flow-step">
+                            <div class="flow-icon"><i class="fas fa-share-alt"></i></div>
+                            <h5 class="fw-bold mb-1">1. Create Your Link</h5>
+                            <p class="text-muted mb-0">Enter your target URL (e.g., OnlyFans).</p>
+                        </div>
+                        <div class="col-12 flow-step">
+                            <div class="flow-icon"><i class="fas fa-shield-alt"></i></div>
+                            <h5 class="fw-bold mb-1">2. We Filter Traffic</h5>
+                            <p class="text-muted mb-0">Bots see a safe page. Real fans pass through.</p>
+                        </div>
+                        <div class="col-12 flow-step">
+                            <div class="flow-icon"><i class="fas fa-rocket"></i></div>
+                            <h5 class="fw-bold mb-1">3. Convert Fans Instantly</h5>
+                            <p class="text-muted mb-0">Users land directly on your content, no extra steps.</p>
                         </div>
                     </div>
                 </div>
@@ -90,107 +171,60 @@
     </div>
 </div>
 
+<!-- COMPARISON SECTION -->
 <section class="py-5">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <h2 class="mb-4">Bypass Platform Restrictions</h2>
-                <p class="text-muted mb-5">
-                    Major platforms like TikTok and Instagram flag direct OnlyFans links. 
-                    SmartLink solves this by showing crawlers a safe landing page while 
-                    sending real users directly to your content.
-                </p>
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2>Stop Leaking Traffic and Money</h2>
+                <p class="lead text-muted">Multi-step funnels kill your conversion rate. SmartLink sends users directly where you want them.</p>
             </div>
         </div>
-        
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="fas fa-robot text-danger fa-3x mb-3"></i>
-                        <h5>Bot Detection</h5>
-                        <p class="text-muted">
-                            Automatically identifies FacebookExternalHit, ByteSpider, 
-                            and other platform crawlers
-                        </p>
+        <div class="row g-4">
+            <!-- The Bad Way -->
+            <div class="col-lg-6">
+                <div class="comparison-card bad">
+                    <h4 class="mb-3"><i class="fas fa-times-circle text-danger me-2"></i>The Old Way</h4>
+                    <p class="text-muted">Your link chain is long, slow, and gets you flagged.</p>
+                    <div class="flow-path mb-2">
+                        TikTok → Instagram → Linktree → OnlyFans
                     </div>
+                    <p class="drop-off-rate fs-5">~60% Subscriber Drop-off</p>
                 </div>
             </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="fas fa-user text-success fa-3x mb-3"></i>
-                        <h5>Human Users</h5>
-                        <p class="text-muted">
-                            Real users get redirected instantly to your OnlyFans 
-                            or target destination
-                        </p>
+            <!-- The Good Way -->
+            <div class="col-lg-6">
+                <div class="comparison-card good">
+                    <h4 class="mb-3"><i class="fas fa-check-circle text-of-blue me-2"></i>The SmartLink Way</h4>
+                    <p class="text-muted">One link, protected, that converts instantly.</p>
+                    <div class="flow-path mb-2">
+                        TikTok → OnlyFans
                     </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="fas fa-shield-alt text-primary fa-3x mb-3"></i>
-                        <h5>Safe Pages</h5>
-                        <p class="text-muted">
-                            Bots see a generic landing page with no adult content 
-                            or flagged terms
-                        </p>
-                    </div>
+                    <p class="conversion-rate fs-5">Direct Conversion. Maximum Earnings.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="bg-light py-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h2 class="mb-4">Increase Your Conversion Rate</h2>
-                <p class="mb-4">
-                    Stop losing potential subscribers to multi-step funnels. 
-                    SmartLink reduces friction by eliminating unnecessary hops 
-                    while keeping you safe from platform penalties.
+<!-- FINAL CTA -->
+<section class="py-5 bg-gradient-dark">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-4">Ready to Protect Your Links?</h2>
+                <p class="lead mb-4">
+                    Get started in 60 seconds. Secure your traffic, bypass bans, and watch your subscriber count grow.
                 </p>
-                
-                <div class="row">
-                    <div class="col-6">
-                        <div class="text-center">
-                            <h3 class="text-success">+25%</h3>
-                            <small class="text-muted">Average CTR Increase</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center">
-                            <h3 class="text-primary">&lt;1%</h3>
-                            <small class="text-muted">Flag Rate</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="bg-white rounded-3 p-4 shadow">
-                    <h5 class="mb-3">Traditional vs SmartLink</h5>
-                    <div class="mb-3">
-                        <small class="text-muted d-block">Traditional:</small>
-                        <div class="flow-chain">
-                            TikTok → Instagram → Linktree → OnlyFans
-                        </div>
-                        <small class="text-danger">60% drop-off rate</small>
-                    </div>
-                    <div>
-                        <small class="text-muted d-block">SmartLink:</small>
-                        <div class="flow-chain">
-                            TikTok → OnlyFans
-                        </div>
-                        <small class="text-success">Direct conversion</small>
-                    </div>
-                </div>
+                {% if not session.user_id %}
+                    <a href="{{ url_for('login') }}" class="btn btn-cta btn-lg">
+                        Start for Free <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-cta btn-lg">
+                        Back to Dashboard <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
