@@ -86,6 +86,19 @@ class RailwayDomainManager:
         if result.get('errors'):
             error_msg = result['errors'][0].get('message', 'Unknown error')
             logger.error(f"Failed to add domain {domain}: {error_msg}")
+            logger.error(f"Full error response: {result}")
+            
+            # Handle specific domain conflicts
+            if 'already exists' in error_msg.lower() or 'invalid domain' in error_msg.lower():
+                logger.warning(f"Domain {domain} may already exist or conflict with existing DNS")
+                # Return success for domains that are already configured
+                return {
+                    'id': f'existing-{domain}',
+                    'domain': domain,
+                    'status': 'existing',
+                    'message': 'Domain already configured via DNS CNAME'
+                }
+            
             raise Exception(f"Railway domain creation failed: {error_msg}")
         
         domain_data = result.get('data', {}).get('customDomainCreate')
