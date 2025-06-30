@@ -353,9 +353,29 @@ def get_domain_from_request():
 
 def is_custom_domain(domain):
     """Check if a domain is a custom domain (not the default SmartLink domain)"""
-    default_domains = ['localhost:5000', '127.0.0.1:5000', 'smartlink.app', 'localhost', '127.0.0.1']
-    return (domain not in default_domains and 
-            not domain.endswith('.replit.app') and 
-            not domain.endswith('.railway.app') and
-            not domain.endswith('.herokuapp.com') and
-            not domain.endswith('.render.com'))
+    default_domains = [
+        'localhost:5000', 
+        'localhost:5001',
+        '127.0.0.1:5000',
+        '127.0.0.1:5001', 
+        'smartlink.app', 
+        'localhost', 
+        '127.0.0.1',
+        'web-production-b9e4.up.railway.app',  # Your specific Railway domain
+        'web-production-dd831.up.railway.app',  # Additional Railway domains
+        'web-production-8df32.up.railway.app'   # Additional Railway domains
+    ]
+    
+    # Check if it's in our default domains list
+    if domain in default_domains:
+        return False
+    
+    # Check for development/deployment platform patterns
+    # But exclude your specific Railway domains above
+    if (domain.endswith('.replit.app') or 
+        domain.endswith('.herokuapp.com') or
+        domain.endswith('.render.com')):
+        return False
+    
+    # All other domains are considered custom domains
+    return True

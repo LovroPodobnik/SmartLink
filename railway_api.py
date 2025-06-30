@@ -89,15 +89,31 @@ class RailwayDomainManager:
             logger.error(f"Full error response: {result}")
             
             # Handle specific domain conflicts
-            if 'already exists' in error_msg.lower() or 'invalid domain' in error_msg.lower():
-                logger.warning(f"Domain {domain} may already exist or conflict with existing DNS")
+            if 'already exists' in error_msg.lower():
+                logger.info(f"Domain {domain} already exists in Railway")
                 # Return success for domains that are already configured
                 return {
                     'id': f'existing-{domain}',
                     'domain': domain,
                     'status': 'existing',
-                    'message': 'Domain already configured via DNS CNAME'
+                    'message': 'Domain already exists in Railway'
                 }
+            
+            # Handle invalid domain errors
+            if 'invalid domain' in error_msg.lower():
+                logger.warning(f"Domain {domain} is invalid or has DNS conflicts")
+                # Still return a partial success to allow manual configuration
+                return {
+                    'id': f'manual-{domain}',
+                    'domain': domain,
+                    'status': 'manual_required',
+                    'message': 'Domain requires manual configuration - CNAME may not be set correctly'
+                }
+            
+            # Handle permission errors
+            if 'permission' in error_msg.lower() or 'forbidden' in error_msg.lower():
+                logger.error(f"Permission denied when adding domain {domain}")
+                raise Exception(f"Railway API permission denied. Please check your API token permissions.")
             
             raise Exception(f"Railway domain creation failed: {error_msg}")
         

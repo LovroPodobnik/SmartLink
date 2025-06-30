@@ -476,13 +476,23 @@ def check_domain_verification(domain_id):
             railway_result = railway_manager.add_custom_domain(domain.domain)
             
             if railway_result:
-                # Railway domain successfully added
-                domain.ssl_enabled = True  # Railway auto-provisions SSL
-                # TODO: Store railway_domain_id after database migration
-                
+                status = railway_result.get('status', 'unknown')
                 railway_id = railway_result.get('id')
-                app.logger.info(f"Domain {domain.domain} added to Railway with ID {railway_id}")
-                flash(f'Domain {domain.domain} successfully verified and activated! SSL enabled automatically.', 'success')
+                
+                if status == 'existing':
+                    # Domain already exists in Railway
+                    domain.ssl_enabled = True
+                    app.logger.info(f"Domain {domain.domain} already exists in Railway")
+                    flash(f'Domain {domain.domain} successfully verified! The domain is already configured in Railway.', 'success')
+                elif status == 'manual_required':
+                    # Domain needs manual configuration
+                    app.logger.warning(f"Domain {domain.domain} requires manual configuration")
+                    flash(f'Domain {domain.domain} verified! Note: The domain may need manual configuration. Please ensure your CNAME record points to {domain.get_cname_record_value()}', 'warning')
+                else:
+                    # Domain successfully added
+                    domain.ssl_enabled = True  # Railway auto-provisions SSL
+                    app.logger.info(f"Domain {domain.domain} added to Railway with ID {railway_id}")
+                    flash(f'Domain {domain.domain} successfully verified and activated! SSL will be enabled automatically.', 'success')
             else:
                 app.logger.warning(f"Domain {domain.domain} verified but Railway setup failed")
                 flash(f'Domain {domain.domain} verified but automatic setup failed. Please contact support.', 'warning')

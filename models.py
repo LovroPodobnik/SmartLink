@@ -126,8 +126,11 @@ class CustomDomain(db.Model):
     
     def get_cname_record_value(self):
         """Get the CNAME record value for routing"""
-        # This should be your Railway app URL
-        return os.environ.get('APP_DOMAIN', 'web-production-b9e4.up.railway.app')
+        # Use Railway's provided environment variables in order of preference
+        return (os.environ.get('RAILWAY_PUBLIC_DOMAIN') or 
+                os.environ.get('RAILWAY_STATIC_URL') or
+                os.environ.get('APP_DOMAIN') or
+                'web-production-b9e4.up.railway.app')
     
     def get_verification_file_content(self):
         """Get the verification file content for file-based verification"""
