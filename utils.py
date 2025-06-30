@@ -153,10 +153,11 @@ def verify_domain_ownership(domain, verification_token, method='dns'):
         return verify_domain_file(domain, verification_token)
 
 def verify_domain_dns(domain, verification_token):
-    """Verify domain ownership via DNS TXT record"""
+    """Verify domain ownership via DNS TXT record on _smartlink-verify subdomain"""
     try:
-        txt_records = dns.resolver.resolve(domain, 'TXT')
-        expected_record = f"smartlink-verify={verification_token}"
+        verification_subdomain = f"_smartlink-verify.{domain}"
+        txt_records = dns.resolver.resolve(verification_subdomain, 'TXT')
+        expected_record = verification_token
         
         for record in txt_records:
             txt_value = record.to_text().strip('"')

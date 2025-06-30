@@ -63,7 +63,7 @@
                                     <tbody>
                                         <tr>
                                             <td><span class="badge bg-info">TXT</span></td>
-                                            <td><code>{{ domain.domain }}</code></td>
+                                            <td><code>{{ domain.get_verification_txt_subdomain() }}</code></td>
                                             <td><code>{{ domain.get_verification_txt_record() }}</code></td>
                                             <td>
                                                 <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('{{ domain.get_verification_txt_record() }}')">

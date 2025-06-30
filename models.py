@@ -112,7 +112,11 @@ class CustomDomain(db.Model):
     
     def get_verification_txt_record(self):
         """Get the TXT record value for domain verification"""
-        return f"smartlink-verify={self.verification_token}"
+        return self.verification_token
+    
+    def get_verification_txt_subdomain(self):
+        """Get the subdomain name for TXT record verification"""
+        return f"_smartlink-verify.{self.domain}"
     
     def get_cname_record_value(self):
         """Get the CNAME record value for routing"""
