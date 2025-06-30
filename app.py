@@ -83,6 +83,7 @@ mail.init_app(app)
 # Import models and routes
 import models
 import routes
+import health_check
 
 # Initialize database tables
 with app.app_context():
