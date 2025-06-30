@@ -2,167 +2,225 @@
 
 {% block head_extra %}
 <style>
-    /* 
-      In a real app, move this to a dedicated CSS file.
-      This CSS creates the new dark theme with OF-inspired colors.
-    */
+    /* OnlyFans-inspired minimal dark theme */
     :root {
-        --dark-bg: #121212;
-        --dark-card: #1e1e1e;
-        --of-blue: #00aff0;
-        --bright-pink: #f9008e;
-        --text-light: #f0f0f0;
-        --text-muted: #888;
+        --dark-bg: #000000;
+        --dark-surface: #111111;
+        --of-blue: #00AFF0;
+        --text-primary: #FFFFFF;
+        --text-secondary: #8A8A8A;
+        --border-color: #1A1A1A;
     }
 
     body {
         background-color: var(--dark-bg);
-        color: var(--text-light);
-    }
-
-    .bg-gradient-dark {
-        background: linear-gradient(145deg, #1e1e1e 0%, #121212 100%);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
     }
 
     .text-of-blue { color: var(--of-blue); }
-    .text-bright-pink { color: var(--bright-pink); }
+    .text-muted { color: var(--text-secondary); }
 
     /* Hero Section */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background-color: var(--dark-bg);
+    }
+
     .hero-section h1 {
-        font-weight: 800;
-        letter-spacing: -1px;
+        font-weight: 700;
+        font-size: 3.5rem;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
     }
 
     .hero-section .lead {
-        color: var(--text-muted);
-        max-width: 500px;
+        color: var(--text-secondary);
+        font-size: 1.25rem;
+        max-width: 600px;
+        margin-bottom: 2rem;
     }
     
     .btn-cta {
-        background-color: var(--bright-pink);
+        background-color: var(--of-blue);
         color: white;
-        font-weight: bold;
-        padding: 1rem 2rem;
+        font-weight: 600;
+        padding: 14px 32px;
         border: none;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .btn-cta:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(249, 0, 142, 0.2);
+        background-color: #0099D0;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 175, 240, 0.3);
         color: white;
     }
     
-    .hero-stats {
+    .value-props {
         display: flex;
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-        font-size: 0.9rem;
+        gap: 3rem;
+        margin-top: 3rem;
+        flex-wrap: wrap;
     }
-    .hero-stats i {
+    
+    .value-prop {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .value-prop-icon {
+        width: 48px;
+        height: 48px;
+        background-color: rgba(0, 175, 240, 0.1);
+        border: 1px solid rgba(0, 175, 240, 0.3);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: var(--of-blue);
     }
 
-    /* How It Works Flow */
-    .flow-step {
-        text-align: center;
+    /* How It Works */
+    .how-it-works {
+        background-color: var(--dark-surface);
+        padding: 80px 0;
     }
-    .flow-icon {
-        width: 80px;
-        height: 80px;
-        background-color: var(--dark-card);
-        border: 2px solid var(--of-blue);
+    
+    .step-card {
+        background-color: var(--dark-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2rem;
+        height: 100%;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .step-card:hover {
+        border-color: var(--of-blue);
+        transform: translateY(-4px);
+    }
+    
+    .step-number {
+        position: absolute;
+        top: -12px;
+        left: 24px;
+        background-color: var(--of-blue);
+        color: white;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1rem auto;
-        font-size: 2rem;
-        color: var(--of-blue);
-        box-shadow: 0 0 15px rgba(0, 175, 240, 0.2);
+        font-weight: 700;
+        font-size: 14px;
     }
 
-    /* Comparison Section */
-    .comparison-card {
-        background-color: var(--dark-card);
-        border-radius: 1rem;
-        padding: 2rem;
-        border: 1px solid #333;
+    /* Problem/Solution Section */
+    .problem-section {
+        padding: 80px 0;
+    }
+    
+    .problem-card {
+        background-color: var(--dark-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2.5rem;
         height: 100%;
     }
-    .comparison-card.bad {
-        border-left: 5px solid #dc3545; /* Bootstrap danger red */
+    
+    .problem-icon {
+        width: 56px;
+        height: 56px;
+        background-color: rgba(255, 59, 48, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: #FF3B30;
+        font-size: 24px;
     }
-    .comparison-card.good {
-        border-left: 5px solid var(--of-blue);
-    }
-    .flow-path {
-        background-color: #2a2a2a;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        font-family: 'Courier New', Courier, monospace;
-        word-break: break-all;
-    }
-    .drop-off-rate {
-        font-weight: bold;
-        color: #dc3545;
-    }
-    .conversion-rate {
-        font-weight: bold;
+    
+    .solution-icon {
+        background-color: rgba(0, 175, 240, 0.1);
         color: var(--of-blue);
+    }
+    
+    /* Stats */
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--of-blue);
+        line-height: 1;
+    }
+    
+    /* Final CTA */
+    .final-cta {
+        background-color: var(--dark-surface);
+        padding: 100px 0;
+        text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section h1 {
+            font-size: 2.5rem;
+        }
+        .value-props {
+            gap: 2rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- HERO SECTION -->
-<div class="hero-section bg-gradient-dark py-5">
-    <div class="container col-xl-10 col-xxl-8 px-4 py-5">
-        <div class="row align-items-center g-lg-5 py-5">
-            <div class="col-lg-7 text-center text-lg-start">
-                <h1 class="display-4 fw-bold lh-1 mb-4">
-                    The Unbannable Link for Serious Creators
-                </h1>
-                <p class="col-lg-10 lead mb-4">
-                    Stop losing subscribers to broken links and platform bans. SmartLink protects your income by sending bots to a safe page while fans go directly to your content.
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1>Smart Links That Never Get Banned</h1>
+                <p class="lead">
+                    Protect your OnlyFans from platform bans. Our AI detects and redirects bots to a safe page while real fans go straight to your content.
                 </p>
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
-                    {% if not session.user_id %}
-                        <a href="{{ url_for('login') }}" class="btn btn-cta btn-lg">
-                            Get Your Smart Link <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
-                    {% else %}
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-cta btn-lg">
-                            Go To Dashboard <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
-                    {% endif %}
-                </div>
-                <div class="hero-stats">
-                    <span><i class="fas fa-check-circle me-2"></i>Bypass Bans</span>
-                    <span><i class="fas fa-check-circle me-2"></i>Increase Clicks</span>
-                    <span><i class="fas fa-check-circle me-2"></i>Instant Redirects</span>
-                </div>
-            </div>
-            <div class="col-md-10 mx-auto col-lg-5 mt-5 mt-lg-0">
-                <div class="p-4 p-md-5 rounded-3" style="background-color: rgba(0,0,0,0.2);">
-                    <h3 class="text-center mb-4 text-of-blue">How It Works</h3>
-                    <div class="row g-4">
-                        <div class="col-12 flow-step">
-                            <div class="flow-icon"><i class="fas fa-share-alt"></i></div>
-                            <h5 class="fw-bold mb-1">1. Create Your Link</h5>
-                            <p class="text-muted mb-0">Enter your target URL (e.g., OnlyFans).</p>
+                {% if not session.user_id %}
+                    <a href="{{ url_for('login') }}" class="btn btn-cta">
+                        Start Free <i class="fas fa-arrow-right"></i>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-cta">
+                        Go to Dashboard <i class="fas fa-arrow-right"></i>
+                    </a>
+                {% endif %}
+                
+                <div class="value-props justify-content-center mt-5">
+                    <div class="value-prop">
+                        <div class="value-prop-icon">
+                            <i class="fas fa-shield-alt"></i>
                         </div>
-                        <div class="col-12 flow-step">
-                            <div class="flow-icon"><i class="fas fa-shield-alt"></i></div>
-                            <h5 class="fw-bold mb-1">2. We Filter Traffic</h5>
-                            <p class="text-muted mb-0">Bots see a safe page. Real fans pass through.</p>
+                        <div class="text-start">
+                            <h6 class="mb-1">Platform Protection</h6>
+                            <p class="text-muted mb-0">Stay unbanned on TikTok, Instagram & more</p>
                         </div>
-                        <div class="col-12 flow-step">
-                            <div class="flow-icon"><i class="fas fa-rocket"></i></div>
-                            <h5 class="fw-bold mb-1">3. Convert Fans Instantly</h5>
-                            <p class="text-muted mb-0">Users land directly on your content, no extra steps.</p>
+                    </div>
+                    <div class="value-prop">
+                        <div class="value-prop-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="text-start">
+                            <h6 class="mb-1">Direct Conversion</h6>
+                            <p class="text-muted mb-0">One click to your OnlyFans, no middleman</p>
                         </div>
                     </div>
                 </div>
@@ -171,36 +229,123 @@
     </div>
 </div>
 
-<!-- COMPARISON SECTION -->
-<section class="py-5">
+<!-- PROBLEM/SOLUTION SECTION -->
+<section class="problem-section">
     <div class="container">
         <div class="row text-center mb-5">
-            <div class="col-lg-8 mx-auto">
-                <h2>Stop Leaking Traffic and Money</h2>
-                <p class="lead text-muted">Multi-step funnels kill your conversion rate. SmartLink sends users directly where you want them.</p>
+            <div class="col-lg-6 mx-auto">
+                <h2 class="mb-3">The Problem Every Creator Faces</h2>
+                <p class="text-muted">Platforms detect and ban OnlyFans links. Multi-step funnels lose 70% of your traffic.</p>
+            </div>
+        </div>
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <h4 class="mb-3">Links Get Banned</h4>
+                    <p class="text-muted mb-3">TikTok and Instagram detect OnlyFans links immediately. Your account gets shadowbanned or deleted.</p>
+                    <p class="text-danger fw-semibold">Result: Lost income & followers</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h4 class="mb-3">Too Many Steps</h4>
+                    <p class="text-muted mb-3">Making fans jump through Instagram → Linktree → OnlyFans loses most of them along the way.</p>
+                    <p class="text-danger fw-semibold">Result: 70% never subscribe</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-5">
+            <h3 class="mb-3">The SmartLink Solution</h3>
+            <p class="text-muted">One protected link that works everywhere</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="problem-card">
+                    <div class="problem-icon solution-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h5 class="mb-3">AI Bot Detection</h5>
+                    <p class="text-muted">Platform crawlers see a safe page. Your links stay undetected and your account stays safe.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="problem-card">
+                    <div class="problem-icon solution-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h5 class="mb-3">Real Fans Pass Through</h5>
+                    <p class="text-muted">Actual users go straight to your OnlyFans. No extra steps, no lost conversions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="problem-card">
+                    <div class="problem-icon solution-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5 class="mb-3">Track Everything</h5>
+                    <p class="text-muted">See exactly where your traffic comes from and optimize what works best.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-6 mx-auto">
+                <h2 class="mb-3">Get Started in 60 Seconds</h2>
+                <p class="text-muted">No technical skills needed. Just paste, customize, and share.</p>
             </div>
         </div>
         <div class="row g-4">
-            <!-- The Bad Way -->
-            <div class="col-lg-6">
-                <div class="comparison-card bad">
-                    <h4 class="mb-3"><i class="fas fa-times-circle text-danger me-2"></i>The Old Way</h4>
-                    <p class="text-muted">Your link chain is long, slow, and gets you flagged.</p>
-                    <div class="flow-path mb-2">
-                        TikTok → Instagram → Linktree → OnlyFans
-                    </div>
-                    <p class="drop-off-rate fs-5">~60% Subscriber Drop-off</p>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <span class="step-number">1</span>
+                    <h5 class="mb-3 mt-3">Paste Your OnlyFans Link</h5>
+                    <p class="text-muted mb-0">Enter your OnlyFans URL and choose what bots should see instead.</p>
                 </div>
             </div>
-            <!-- The Good Way -->
-            <div class="col-lg-6">
-                <div class="comparison-card good">
-                    <h4 class="mb-3"><i class="fas fa-check-circle text-of-blue me-2"></i>The SmartLink Way</h4>
-                    <p class="text-muted">One link, protected, that converts instantly.</p>
-                    <div class="flow-path mb-2">
-                        TikTok → OnlyFans
+            <div class="col-md-4">
+                <div class="step-card">
+                    <span class="step-number">2</span>
+                    <h5 class="mb-3 mt-3">Get Your Smart Link</h5>
+                    <p class="text-muted mb-0">We generate a protected link that works on any platform.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <span class="step-number">3</span>
+                    <h5 class="mb-3 mt-3">Share Everywhere</h5>
+                    <p class="text-muted mb-0">Use it on TikTok, Instagram, Twitter - anywhere you promote.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="row g-4 mt-3">
+                    <div class="col-md-4">
+                        <div class="stat-value">0%</div>
+                        <p class="text-muted mt-2">Ban Rate</p>
                     </div>
-                    <p class="conversion-rate fs-5">Direct Conversion. Maximum Earnings.</p>
+                    <div class="col-md-4">
+                        <div class="stat-value">3x</div>
+                        <p class="text-muted mt-2">More Conversions</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-value">24/7</div>
+                        <p class="text-muted mt-2">Protection</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -208,21 +353,22 @@
 </section>
 
 <!-- FINAL CTA -->
-<section class="py-5 bg-gradient-dark">
-    <div class="container text-center">
+<section class="final-cta">
+    <div class="container">
         <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <h2 class="display-5 fw-bold mb-4">Ready to Protect Your Links?</h2>
-                <p class="lead mb-4">
-                    Get started in 60 seconds. Secure your traffic, bypass bans, and watch your subscriber count grow.
+            <div class="col-lg-6 mx-auto">
+                <h2 class="mb-4">Start Protecting Your Income Today</h2>
+                <p class="lead text-muted mb-4">
+                    Join thousands of creators who've stopped losing fans to broken links.
                 </p>
                 {% if not session.user_id %}
-                    <a href="{{ url_for('login') }}" class="btn btn-cta btn-lg">
-                        Start for Free <i class="fas fa-arrow-right ms-2"></i>
+                    <a href="{{ url_for('login') }}" class="btn btn-cta">
+                        Create Your Smart Link <i class="fas fa-arrow-right"></i>
                     </a>
+                    <p class="text-muted mt-3 small">Free to start • No credit card required</p>
                 {% else %}
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-cta btn-lg">
-                        Back to Dashboard <i class="fas fa-arrow-right ms-2"></i>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-cta">
+                        Back to Dashboard <i class="fas fa-arrow-right"></i>
                     </a>
                 {% endif %}
             </div>
