@@ -95,7 +95,14 @@ def is_suspicious_request():
 def send_magic_link_email(email, token):
     """Send magic link email for authentication"""
     subject = "Your SmartLink Login Link"
-    magic_link = f"http://localhost:5000/auth/verify/{token}"
+    
+    # Use the current request context to build the magic link URL
+    from flask import request, url_for
+    if request:
+        magic_link = url_for('verify_login', token=token, _external=True)
+    else:
+        # Fallback for testing or non-request contexts
+        magic_link = f"http://localhost:5000/auth/verify/{token}"
     
     body = f"""
     Hi!
@@ -155,5 +162,9 @@ def get_domain_from_request():
 
 def is_custom_domain(domain):
     """Check if a domain is a custom domain (not the default SmartLink domain)"""
-    default_domains = ['localhost:5000', '127.0.0.1:5000', 'smartlink.app']
-    return domain not in default_domains and domain.endswith('.replit.app') == False
+    default_domains = ['localhost:5000', '127.0.0.1:5000', 'smartlink.app', 'localhost', '127.0.0.1']
+    return (domain not in default_domains and 
+            not domain.endswith('.replit.app') and 
+            not domain.endswith('.railway.app') and
+            not domain.endswith('.herokuapp.com') and
+            not domain.endswith('.render.com'))

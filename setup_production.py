@@ -20,6 +20,7 @@ def create_env_template():
 
 # Required: Flask secret key (KEEP THIS SECRET!)
 FLASK_SECRET_KEY={secret_key}
+SESSION_SECRET={secret_key}
 
 # Required: Database connection
 DATABASE_URL=postgresql://username:password@host:port/database
@@ -32,8 +33,9 @@ MAIL_USERNAME=your-email@gmail.com
 MAIL_PASSWORD=your-gmail-app-password
 MAIL_DEFAULT_SENDER=noreply@yourdomain.com
 
-# Optional: Production settings
+# Production settings
 FLASK_ENV=production
+DEBUG=False
 """
     
     with open('.env.template', 'w') as f:
@@ -48,7 +50,9 @@ def check_required_files():
         'requirements.txt',
         'Procfile', 
         'runtime.txt',
-        'railway.json'
+        'railway.json',
+        'main.py',
+        'app.py'
     ]
     
     missing_files = []
