@@ -34,6 +34,7 @@ class LoginToken(db.Model):
 class SmartLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    custom_domain_id = db.Column(db.Integer, db.ForeignKey('custom_domain.id'), nullable=True)
     short_code = db.Column(db.String(10), unique=True, nullable=False)
     target_url = db.Column(db.String(500), nullable=False)  # OnlyFans or target URL
     safe_url = db.Column(db.String(500), nullable=True)     # Safe page URL (optional)
@@ -48,6 +49,7 @@ class SmartLink(db.Model):
     
     # Relationships
     clicks = db.relationship('Click', backref='smart_link', lazy=True)
+    custom_domain = db.relationship('CustomDomain', backref='smart_links', lazy=True)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -60,6 +62,17 @@ class SmartLink(db.Model):
             code = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(6))
             if not SmartLink.query.filter_by(short_code=code).first():
                 return code
+    
+    def get_full_url(self, request_host=None):
+        """Get the full URL for this smart link"""
+        if self.custom_domain and self.custom_domain.is_verified and self.custom_domain.is_active:
+            # Use custom domain
+            protocol = 'https' if self.custom_domain.ssl_enabled else 'http'
+            return f"{protocol}://{self.custom_domain.domain}/{self.short_code}"
+        else:
+            # Use default domain from request or fallback
+            host = request_host or 'smartlink.app'
+            return f"https://{host}/{self.short_code}"
 
 class Click(db.Model):
     id = db.Column(db.Integer, primary_key=True)

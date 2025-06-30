@@ -135,9 +135,27 @@ def create_link():
     """Create new smart link"""
     form = SmartLinkForm()
     
+    # Get user's verified custom domains
+    user_id = session['user_id']
+    verified_domains = CustomDomain.query.filter_by(
+        user_id=user_id,
+        is_verified=True,
+        is_active=True
+    ).all()
+    
+    # Set up domain choices
+    domain_choices = [('', 'Default Domain (SmartLink)')] + [
+        (domain.id, domain.domain) for domain in verified_domains
+    ]
+    form.custom_domain_id.choices = domain_choices
+    
     if form.validate_on_submit():
+        # Handle domain selection
+        custom_domain_id = form.custom_domain_id.data if form.custom_domain_id.data else None
+        
         smart_link = SmartLink(
             user_id=session['user_id'],
+            custom_domain_id=custom_domain_id,
             title=form.title.data,
             description=form.description.data,
             target_url=form.target_url.data,
@@ -149,10 +167,12 @@ def create_link():
         db.session.add(smart_link)
         db.session.commit()
         
-        flash(f'Smart link created! Short URL: /{smart_link.short_code}', 'success')
+        # Generate appropriate success message with full URL
+        full_url = smart_link.get_full_url(request.host)
+        flash(f'Smart link created! URL: {full_url}', 'success')
         return redirect(url_for('dashboard'))
     
-    return render_template('create_link.html', form=form)
+    return render_template('create_link.html', form=form, verified_domains=verified_domains)
 
 @app.route('/analytics/<short_code>')
 @login_required
